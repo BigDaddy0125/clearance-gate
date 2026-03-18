@@ -1,0 +1,26 @@
+{
+  "profile": "itops_deployment_v1",
+  "description": "Initial profile for deployment and change authorization.",
+  "responsibilityRoles": [
+    "decision_owner",
+    "acknowledging_authority",
+    "audit_reviewer"
+  ],
+  "constraints": [
+    {
+      "id": "RISK_ACK_REQUIRED",
+      "kind": "ack_required",
+      "whenRiskFlagPresent": "HIGH_IMPACT"
+    },
+    {
+      "id": "OWNER_REQUIRED",
+      "kind": "required_field",
+      "field": "responsibility.owner"
+    },
+    {
+      "id": "SOURCE_REQUIRED",
+      "kind": "required_field",
+      "field": "metadata.source_system"
+    }
+  ]
+}

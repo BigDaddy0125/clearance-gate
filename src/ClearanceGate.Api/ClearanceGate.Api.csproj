@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\ClearanceGate.Application\ClearanceGate.Application.csproj" />
+    <ProjectReference Include="..\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
+  </ItemGroup>
+</Project>
