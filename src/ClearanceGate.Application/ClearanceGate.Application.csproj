@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\ClearanceGate.Audit\ClearanceGate.Audit.csproj" />
     <ProjectReference Include="..\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
     <ProjectReference Include="..\ClearanceGate.Kernel\ClearanceGate.Kernel.csproj" />
+    <ProjectReference Include="..\ClearanceGate.Policy\ClearanceGate.Policy.csproj" />
   </ItemGroup>
 </Project>

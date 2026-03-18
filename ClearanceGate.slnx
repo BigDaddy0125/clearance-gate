@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ClearanceGate.Api/ClearanceGate.Api.csproj" />
+    <Project Path="src/ClearanceGate.Application/ClearanceGate.Application.csproj" />
+    <Project Path="src/ClearanceGate.Audit/ClearanceGate.Audit.csproj" />
+    <Project Path="src/ClearanceGate.Contracts/ClearanceGate.Contracts.csproj" />
+    <Project Path="src/ClearanceGate.Kernel/ClearanceGate.Kernel.csproj" />
+    <Project Path="src/ClearanceGate.Policy/ClearanceGate.Policy.csproj" />
+    <Project Path="src/ClearanceGate.Profiles/ClearanceGate.Profiles.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ClearanceGate.Api.Tests/ClearanceGate.Api.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,1 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
+    <ProjectReference Include="..\ClearanceGate.Kernel\ClearanceGate.Kernel.csproj" />
+  </ItemGroup>
+</Project>
