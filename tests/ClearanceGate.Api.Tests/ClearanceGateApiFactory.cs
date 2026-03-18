@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace ClearanceGate.Api.Tests;
 
@@ -15,11 +16,11 @@ public sealed class ClearanceGateApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((_, configBuilder) =>
+        builder.ConfigureServices(services =>
         {
-            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+            services.PostConfigure<ClearanceGate.Audit.AuditStoreOptions>(options =>
             {
-                ["ConnectionStrings:AuditStore"] = $"Data Source={databasePath}",
+                options.ConnectionString = $"Data Source={databasePath}";
             });
         });
     }

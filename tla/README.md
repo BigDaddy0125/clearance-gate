@@ -13,10 +13,10 @@ Initial model set:
 
 - kernel outcome exclusivity
 - fail-closed behavior
+- acknowledgment boundedness
+- request idempotency
 
 Planned model set:
 
-- acknowledgment boundedness
 - auditability reachability
-- request idempotency
 - profile conformance

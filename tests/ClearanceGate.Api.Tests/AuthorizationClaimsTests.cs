@@ -154,9 +154,22 @@ public sealed class AuthorizationClaimsTests
 
         public void Dispose()
         {
-            if (File.Exists(DatabasePath))
+            TryDelete(DatabasePath);
+            TryDelete($"{DatabasePath}-shm");
+            TryDelete($"{DatabasePath}-wal");
+        }
+
+        private static void TryDelete(string path)
+        {
+            try
             {
-                File.Delete(DatabasePath);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch (IOException)
+            {
             }
         }
     }

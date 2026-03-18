@@ -16,6 +16,12 @@ The key idea is:
 
 This strategy is designed to support auditable assurance, not vague marketing claims.
 
+Executable claim tests are allowed as a companion layer, but they do not replace formal models.
+
+- integration tests prove the implementation currently respects the claim
+- TLA+ models prove the claim is structurally meaningful under abstraction
+- both should point to the same claim identifier
+
 ## What We Are Verifying
 
 ClearanceGate should formally verify structural authorization correctness, not domain correctness.
@@ -53,6 +59,13 @@ For each important claim:
 6. Keep both runnable in CI.
 
 This is the main lesson from `clawdbot-formal-models`: negative models are not optional. They prove the check is meaningful.
+
+For ClearanceGate, each mature claim should ideally have:
+
+- one claim entry in `docs/security-claims.md`
+- one runtime test or harness in `tests/`
+- one green TLA+ model
+- one red TLA+ model
 
 ## Claim Inventory
 
@@ -221,6 +234,12 @@ The formal models still remain abstractions, but extracted constants reduce drif
 - idempotency
 - replay resistance
 - durable evidence before allow
+
+Current implementation status:
+
+- CG1 and CG2 have green/red TLA coverage
+- CG3 and CG5 have green/red TLA coverage plus runtime claim tests
+- CG4 currently has runtime durable-store coverage and should get a dedicated TLA model next
 
 ### Phase D: Profile conformance
 

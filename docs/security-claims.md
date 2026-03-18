@@ -50,7 +50,18 @@ Statement:
 
 Spec:
 
-- planned
+- `tla/specs/AcknowledgmentBounded.tla`
+- `tla/specs/AcknowledgmentBounded_BadUniversalAck.tla`
+
+Models:
+
+- `tla/models/ack_bounded_ok.cfg`
+- `tla/models/ack_bounded_negative_universal_ack.cfg`
+
+Executable coverage:
+
+- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
+- runtime enforcement in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
 
 ### CG4: Non-blocking outcomes require evidence
 
@@ -62,6 +73,11 @@ Spec:
 
 - planned
 
+Executable coverage:
+
+- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
+- durable persistence in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
+
 ### CG5: Request replay is idempotent
 
 Statement:
@@ -70,4 +86,15 @@ Statement:
 
 Spec:
 
-- planned
+- `tla/specs/RequestIdempotency.tla`
+- `tla/specs/RequestIdempotency_BadOverwrite.tla`
+
+Models:
+
+- `tla/models/idempotency_ok.cfg`
+- `tla/models/idempotency_negative_overwrite.cfg`
+
+Executable coverage:
+
+- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
+- runtime enforcement in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
