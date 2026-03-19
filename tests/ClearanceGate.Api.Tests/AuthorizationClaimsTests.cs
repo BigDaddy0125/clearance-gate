@@ -118,6 +118,28 @@ public sealed class AuthorizationClaimsTests
         }
     }
 
+    [Fact]
+    public async Task UnknownProfile_IsRejectedFailClosed()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-5", "dec-claim-5", Array.Empty<string>(), "alice", "change-control") with
+        {
+            Profile = "nonexistent_profile_v1",
+        };
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var problem = await authorizeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, authorizeResponse.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Authorization rejected", problem.Title);
+
+        var auditResponse = await client.GetAsync("/audit/dec-claim-5");
+        Assert.Equal(HttpStatusCode.NotFound, auditResponse.StatusCode);
+    }
+
     private static ClearanceGate.Contracts.AuthorizationRequest BuildAuthorizationRequest(
         string requestId,
         string decisionId,

@@ -22,6 +22,7 @@ builder.Services.Configure<ClearanceGate.Audit.AuditStoreOptions>(options =>
 {
     options.ConnectionString = auditStoreConnectionString;
 });
+builder.Services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog, ClearanceGate.Profiles.EmbeddedProfileCatalog>();
 builder.Services.AddSingleton<ClearanceGate.Audit.IAuditStoreInitializer, ClearanceGate.Audit.SqliteAuditStoreInitializer>();
 builder.Services.AddSingleton<ClearanceGate.Audit.IDecisionAuditStore, ClearanceGate.Audit.SqliteDecisionAuditStore>();
 builder.Services.AddSingleton<ClearanceGate.Policy.IPolicyEvaluator, ClearanceGate.Policy.ItOpsDeploymentPolicyEvaluator>();
@@ -36,13 +37,25 @@ await app.Services.GetRequiredService<ClearanceGate.Audit.IAuditStoreInitializer
 
 app.UseExceptionHandler();
 
-app.MapPost("/authorize", async (
+app.MapPost("/authorize", async Task<IResult> (
     ClearanceGate.Contracts.AuthorizationRequest request,
     ClearanceGate.Application.Abstractions.IAuthorizationService service,
     CancellationToken cancellationToken) =>
 {
-    var response = await service.AuthorizeAsync(request, cancellationToken);
-    return TypedResults.Ok(response);
+    try
+    {
+        var response = await service.AuthorizeAsync(request, cancellationToken);
+        return TypedResults.Ok(response);
+    }
+    catch (KeyNotFoundException exception)
+    {
+        return TypedResults.BadRequest(new ProblemDetails
+        {
+            Title = "Authorization rejected",
+            Detail = exception.Message,
+            Status = StatusCodes.Status400BadRequest,
+        });
+    }
 });
 
 app.MapPost("/acknowledge", async Task<IResult> (

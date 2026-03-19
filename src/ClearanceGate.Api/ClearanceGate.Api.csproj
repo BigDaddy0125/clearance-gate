@@ -2,5 +2,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ClearanceGate.Application\ClearanceGate.Application.csproj" />
     <ProjectReference Include="..\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
+    <ProjectReference Include="..\ClearanceGate.Profiles\ClearanceGate.Profiles.csproj" />
   </ItemGroup>
 </Project>
