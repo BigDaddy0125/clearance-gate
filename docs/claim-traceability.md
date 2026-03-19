@@ -23,7 +23,8 @@ Runtime anchors:
 
 Executable anchors:
 
-- no dedicated integration test yet
+- `tests/ClearanceGate.Api.Tests/KernelClaimsTests.cs`
+  `EveryKnownState_MapsToExactlyOneDefinedOutcome`
 
 CI path:
 
@@ -45,6 +46,8 @@ Runtime anchors:
 
 Executable anchors:
 
+- `tests/ClearanceGate.Api.Tests/KernelClaimsTests.cs`
+  `DegradedAndInsufficientStates_NeverProceed`
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
   `BlockedDecision_CannotBeReleasedByAcknowledgment`
 

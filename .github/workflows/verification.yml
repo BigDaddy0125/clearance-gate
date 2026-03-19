@@ -34,7 +34,12 @@ jobs:
         run: dotnet restore .\ClearanceGate.slnx
 
       - name: Runtime claim tests
-        run: dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj --configuration Release --no-restore
+        run: >
+          dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj
+          --configuration Release
+          --no-restore
+          --logger "trx;LogFileName=runtime-claims.trx"
+          --results-directory .\artifacts\test-results
 
       - name: TLC green models
         shell: pwsh
@@ -48,8 +53,22 @@ jobs:
         shell: pwsh
         run: Get-Content .\artifacts\tlc\summary.md >> $env:GITHUB_STEP_SUMMARY
 
+      - name: Publish runtime claim summary
+        shell: pwsh
+        run: |
+          .\scripts\write-runtime-claim-summary.ps1 `
+            -TrxPath .\artifacts\test-results\runtime-claims.trx `
+            -OutputPath .\artifacts\test-results\summary.md
+          Get-Content .\artifacts\test-results\summary.md >> $env:GITHUB_STEP_SUMMARY
+
       - name: Upload TLC artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tlc-logs
           path: artifacts/tlc
+
+      - name: Upload runtime claim artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-claim-results
+          path: artifacts/test-results

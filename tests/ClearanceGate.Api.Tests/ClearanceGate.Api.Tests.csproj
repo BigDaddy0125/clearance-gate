@@ -19,5 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ClearanceGate.Api\ClearanceGate.Api.csproj" />
     <ProjectReference Include="..\..\src\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\ClearanceGate.Kernel\ClearanceGate.Kernel.csproj" />
   </ItemGroup>
 </Project>
