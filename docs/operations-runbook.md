@@ -5,6 +5,7 @@ This runbook covers the current operational boundary for ClearanceGate's minimal
 ## Startup Preconditions
 
 - Embedded profiles must load and validate at process startup.
+- Embedded profile names must use canonical versioned identity: `<family>_v<positive integer>`.
 - The audit store connection string must be a valid SQLite connection string with a non-empty `Data Source`.
 - The audit database schema must be at or below the current supported schema version.
 - Unknown future audit schema versions must stop startup rather than degrade open.
@@ -13,6 +14,7 @@ This runbook covers the current operational boundary for ClearanceGate's minimal
 
 - Invalid profile catalog:
   The process fails during startup validation and does not serve requests.
+  This includes malformed profile identities or duplicate family/version pairs.
 - Invalid audit store configuration:
   The process fails during startup validation and does not serve requests.
 - Unsupported audit schema version:
