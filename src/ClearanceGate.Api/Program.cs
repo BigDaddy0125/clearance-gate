@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuredAuditStoreConnectionString = builder.Configuration.GetConnectionString("AuditStore")
@@ -22,6 +23,7 @@ builder.Services.Configure<ClearanceGate.Audit.AuditStoreOptions>(options =>
 {
     options.ConnectionString = auditStoreConnectionString;
 });
+builder.Services.AddSingleton<IValidateOptions<ClearanceGate.Audit.AuditStoreOptions>, ClearanceGate.Audit.AuditStoreOptionsValidator>();
 builder.Services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog, ClearanceGate.Profiles.EmbeddedProfileCatalog>();
 builder.Services.AddSingleton<ClearanceGate.Policy.IProfilePolicyProjector, ClearanceGate.Policy.ProfilePolicyProjector>();
 builder.Services.AddSingleton<ClearanceGate.Audit.IAuditStoreInitializer, ClearanceGate.Audit.SqliteAuditStoreInitializer>();

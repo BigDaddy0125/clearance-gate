@@ -20,6 +20,7 @@ Initial focus:
 Repository layout:
 
 - `docs/` product, architecture, and formal verification strategy
+- `docs/operations-runbook.md` startup, schema, and verification runbook
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace ClearanceGate.Api;
 
 public static class StartupValidation
@@ -9,6 +11,8 @@ public static class StartupValidation
     {
         try
         {
+            _ = services.GetRequiredService<IOptions<ClearanceGate.Audit.AuditStoreOptions>>().Value;
+
             // Force profile catalog construction at startup so invalid embedded profiles fail closed.
             _ = services.GetRequiredService<ClearanceGate.Profiles.IProfileCatalog>();
 
