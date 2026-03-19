@@ -13,6 +13,11 @@ CONSTANTS
   ProceedOutcome,
   NonBlockingOutcomes,
   RequiresEvidenceOutcomes,
+  RequiredRoles,
+  ProfileRoles,
+  AllowedConstraintKinds,
+  ProfileConstraintKinds,
+  DeclaredOutcomes,
   InfoInsufficientOutcome,
   AwaitingAckOutcome,
   AuthorizedOutcome,
@@ -24,6 +29,8 @@ ASSUME
   /\ ProceedOutcome \in KernelOutcomes
   /\ NonBlockingOutcomes \subseteq KernelOutcomes
   /\ RequiresEvidenceOutcomes \subseteq KernelOutcomes
+  /\ RequiredRoles /= {}
+  /\ AllowedConstraintKinds /= {}
 
 Inv_ProfileUsesOnlyKernelOutcomes ==
   /\ InfoInsufficientOutcome \in KernelOutcomes
@@ -39,6 +46,15 @@ Inv_ProfilePreservesFailClosed ==
 
 Inv_ProfileRequiresEvidenceForNonBlocking ==
   NonBlockingOutcomes \subseteq RequiresEvidenceOutcomes
+
+Inv_ProfileRolesCoverKernelResponsibilities ==
+  RequiredRoles \subseteq ProfileRoles
+
+Inv_ProfileConstraintKindsAllowed ==
+  ProfileConstraintKinds \subseteq AllowedConstraintKinds
+
+Inv_ProfileDeclaresOnlyKernelOutcomes ==
+  DeclaredOutcomes \subseteq KernelOutcomes
 
 VARIABLE dummy
 

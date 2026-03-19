@@ -28,6 +28,9 @@ $resolvedJar = (Resolve-Path $resolvedTlaToolsJarInput).Path
 $resolvedOutputRoot = [System.IO.Path]::GetFullPath($resolvedOutputRootInput)
 [System.IO.Directory]::CreateDirectory($resolvedOutputRoot) | Out-Null
 
+$profileConfigOutputPath = Join-Path $repoRoot "generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
+& (Join-Path $PSScriptRoot "generate-profile-tla-config.ps1") -OutputPath $profileConfigOutputPath
+
 $models = @(
     @{
         Name = "kernel_ok"
@@ -56,7 +59,7 @@ $models = @(
     @{
         Name = "profile_conformance_ok"
         Spec = ".\\tla\\specs\\ProfileConformance.tla"
-        Config = ".\\tla\\models\\profile_conformance_ok.cfg"
+        Config = ".\\generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
         ExpectSuccess = $true
     }
 )

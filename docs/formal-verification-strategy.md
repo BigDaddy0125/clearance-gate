@@ -240,7 +240,7 @@ Current implementation status:
 - CG1 and CG2 have green/red TLA coverage
 - CG3 and CG5 have green/red TLA coverage plus runtime claim tests
 - CG4 has green/red TLA coverage plus runtime durable-store coverage
-- CG6 has green/red TLA coverage for profile conformance against kernel outcomes and evidence rules
+- CG6 has green/red TLA coverage for profile conformance, and the green model now derives profile role/kind metadata from the real profile JSON
 
 ### Phase D: Profile conformance
 

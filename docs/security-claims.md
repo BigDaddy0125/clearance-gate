@@ -119,7 +119,7 @@ Spec:
 
 Models:
 
-- `tla/models/profile_conformance_ok.cfg`
+- generated from `src/ClearanceGate.Profiles/itops_deployment_v1.json` via `scripts/generate-profile-tla-config.ps1`
 - `tla/models/profile_conformance_negative_implicit_allow.cfg`
 
 Runtime anchors:

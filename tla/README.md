@@ -17,3 +17,7 @@ Initial model set:
 - durable evidence before non-blocking outcome
 - request idempotency
 - profile conformance to kernel invariants
+
+The profile conformance green config is generated from the checked-in profile JSON:
+
+- `powershell -ExecutionPolicy Bypass -File .\scripts\generate-profile-tla-config.ps1`
