@@ -4,7 +4,8 @@ namespace ClearanceGate.Application.Services;
 
 public sealed class AuthorizationService(
     ClearanceGate.Policy.IPolicyEvaluator policyEvaluator,
-    ClearanceGate.Audit.IDecisionAuditStore auditStore) : ClearanceGate.Application.Abstractions.IAuthorizationService
+    ClearanceGate.Audit.IDecisionAuditStore auditStore,
+    ClearanceGate.Profiles.IProfileCatalog profileCatalog) : ClearanceGate.Application.Abstractions.IAuthorizationService
 {
     public Task<ClearanceGate.Contracts.AuthorizationResponse> AuthorizeAsync(
         ClearanceGate.Contracts.AuthorizationRequest request,
@@ -15,6 +16,13 @@ public sealed class AuthorizationService(
         {
             return Task.FromResult(ToResponse(existingRecord));
         }
+
+        var profile = profileCatalog.GetRequiredProfile(request.Profile);
+        EnsureRoleAllowed(
+            profile,
+            request.Responsibility.Role,
+            ClearanceGate.Profiles.KernelResponsibilityRoles.DecisionOwner,
+            "authorization");
 
         var evaluation = policyEvaluator.Evaluate(request);
 
@@ -50,6 +58,25 @@ public sealed class AuthorizationService(
         }
 
         return Task.FromResult(ToResponse(savedRecord));
+    }
+
+    private static void EnsureRoleAllowed(
+        ClearanceGate.Profiles.ClearanceProfile profile,
+        string actualRole,
+        string requiredRole,
+        string operation)
+    {
+        if (!profile.ResponsibilityRoles.Contains(requiredRole, StringComparer.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Profile '{profile.Profile}' does not permit role '{requiredRole}' for {operation}.");
+        }
+
+        if (!string.Equals(actualRole, requiredRole, StringComparison.Ordinal))
+        {
+            throw new ArgumentException(
+                $"Role '{actualRole}' is not permitted for {operation}; expected '{requiredRole}'.");
+        }
     }
 
     private static ClearanceGate.Contracts.AuthorizationResponse ToResponse(ClearanceGate.Audit.DecisionAuditRecord record) =>

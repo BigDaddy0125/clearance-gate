@@ -3,12 +3,26 @@ using ClearanceGate.Kernel;
 namespace ClearanceGate.Application.Services;
 
 public sealed class AcknowledgmentService(
-    ClearanceGate.Audit.IDecisionAuditStore auditStore) : ClearanceGate.Application.Abstractions.IAcknowledgmentService
+    ClearanceGate.Audit.IDecisionAuditStore auditStore,
+    ClearanceGate.Profiles.IProfileCatalog profileCatalog) : ClearanceGate.Application.Abstractions.IAcknowledgmentService
 {
     public Task<ClearanceGate.Contracts.AcknowledgmentResponse> AcknowledgeAsync(
         ClearanceGate.Contracts.AcknowledgmentRequest request,
         CancellationToken cancellationToken)
     {
+        var decision = auditStore.GetByDecisionId(request.DecisionId);
+        if (decision is null)
+        {
+            throw new KeyNotFoundException($"Decision '{request.DecisionId}' was not found.");
+        }
+
+        var profile = profileCatalog.GetRequiredProfile(decision.Profile);
+        EnsureRoleAllowed(
+            profile,
+            request.Acknowledger.Role,
+            ClearanceGate.Profiles.KernelResponsibilityRoles.AcknowledgingAuthority,
+            "acknowledgment");
+
         var writeResult = auditStore.SaveAcknowledgment(
             request.DecisionId,
             request.Acknowledger.Id,
@@ -36,5 +50,24 @@ public sealed class AcknowledgmentService(
             updatedRecord.EvidenceId);
 
         return Task.FromResult(response);
+    }
+
+    private static void EnsureRoleAllowed(
+        ClearanceGate.Profiles.ClearanceProfile profile,
+        string actualRole,
+        string requiredRole,
+        string operation)
+    {
+        if (!profile.ResponsibilityRoles.Contains(requiredRole, StringComparer.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Profile '{profile.Profile}' does not permit role '{requiredRole}' for {operation}.");
+        }
+
+        if (!string.Equals(actualRole, requiredRole, StringComparison.Ordinal))
+        {
+            throw new ArgumentException(
+                $"Role '{actualRole}' is not permitted for {operation}; expected '{requiredRole}'.");
+        }
     }
 }

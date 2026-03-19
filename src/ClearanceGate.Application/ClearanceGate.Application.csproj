@@ -4,5 +4,6 @@
     <ProjectReference Include="..\ClearanceGate.Contracts\ClearanceGate.Contracts.csproj" />
     <ProjectReference Include="..\ClearanceGate.Kernel\ClearanceGate.Kernel.csproj" />
     <ProjectReference Include="..\ClearanceGate.Policy\ClearanceGate.Policy.csproj" />
+    <ProjectReference Include="..\ClearanceGate.Profiles\ClearanceGate.Profiles.csproj" />
   </ItemGroup>
 </Project>

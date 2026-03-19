@@ -12,9 +12,9 @@ public sealed class EmbeddedProfileCatalog : IProfileCatalog
 
     private static readonly string[] RequiredKernelRoles =
     {
-        "decision_owner",
-        "acknowledging_authority",
-        "audit_reviewer",
+        KernelResponsibilityRoles.DecisionOwner,
+        KernelResponsibilityRoles.AcknowledgingAuthority,
+        KernelResponsibilityRoles.AuditReviewer,
     };
 
     private static readonly string[] AllowedConstraintKinds =

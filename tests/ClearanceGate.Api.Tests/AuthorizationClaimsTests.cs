@@ -20,7 +20,7 @@ public sealed class AuthorizationClaimsTests
 
         var acknowledgeResponse = await client.PostAsJsonAsync("/acknowledge", new ClearanceGate.Contracts.AcknowledgmentRequest(
             "dec-claim-1",
-            new ClearanceGate.Contracts.Acknowledger("alice", "release-manager"),
+            new ClearanceGate.Contracts.Acknowledger("alice", "acknowledging_authority"),
             new ClearanceGate.Contracts.AcknowledgmentPayload("risk_acceptance", "2026-03-18T10:05:00Z")));
 
         var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-1");
@@ -47,7 +47,7 @@ public sealed class AuthorizationClaimsTests
         var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
         var acknowledgeResponse = await client.PostAsJsonAsync("/acknowledge", new ClearanceGate.Contracts.AcknowledgmentRequest(
             "dec-claim-2",
-            new ClearanceGate.Contracts.Acknowledger("alice", "release-manager"),
+            new ClearanceGate.Contracts.Acknowledger("alice", "acknowledging_authority"),
             new ClearanceGate.Contracts.AcknowledgmentPayload("risk_acceptance", "2026-03-18T10:05:00Z")));
 
         var problem = await acknowledgeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -140,6 +140,61 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal(HttpStatusCode.NotFound, auditResponse.StatusCode);
     }
 
+    [Fact]
+    public async Task AuthorizationRole_MustMatchProfileRequirement()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-6", "dec-claim-6", Array.Empty<string>(), "alice", "change-control") with
+        {
+            Responsibility = new ClearanceGate.Contracts.ResponsibilityDescriptor("alice", "release-manager"),
+        };
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var problem = await authorizeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, authorizeResponse.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Authorization rejected", problem.Title);
+    }
+
+    [Fact]
+    public async Task AcknowledgmentRole_MustMatchProfileRequirement()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest(
+            "req-claim-7",
+            "dec-claim-7",
+            new[] { "HIGH_IMPACT" },
+            "alice",
+            "change-control") with
+        {
+            Responsibility = new ClearanceGate.Contracts.ResponsibilityDescriptor("alice", "decision_owner"),
+        };
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+
+        var acknowledgeResponse = await client.PostAsJsonAsync("/acknowledge", new ClearanceGate.Contracts.AcknowledgmentRequest(
+            "dec-claim-7",
+            new ClearanceGate.Contracts.Acknowledger("alice", "release-manager"),
+            new ClearanceGate.Contracts.AcknowledgmentPayload("risk_acceptance", "2026-03-18T10:05:00Z")));
+        var problem = await acknowledgeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, acknowledgeResponse.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Equal("Acknowledgment rejected", problem.Title);
+
+        var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-7");
+        Assert.NotNull(auditPayload);
+        Assert.Equal("REQUIRE_ACK", auditPayload.Outcome);
+        Assert.Single(auditPayload.AuthorizationTimeline);
+        Assert.Equal("AWAITING_ACK", auditPayload.AuthorizationTimeline[0].State);
+    }
+
     private static ClearanceGate.Contracts.AuthorizationRequest BuildAuthorizationRequest(
         string requestId,
         string decisionId,
@@ -156,7 +211,7 @@ public sealed class AuthorizationClaimsTests
                 ["changeWindow"] = "business-hours",
             }),
             riskFlags,
-            new ClearanceGate.Contracts.ResponsibilityDescriptor(owner, "release-manager"),
+            new ClearanceGate.Contracts.ResponsibilityDescriptor(owner, "decision_owner"),
             new ClearanceGate.Contracts.RequestMetadata(sourceSystem, "2026-03-18T10:00:00Z"));
 
     private static TemporaryDatabaseHarness CreateHarness()

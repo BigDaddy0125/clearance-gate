@@ -56,6 +56,15 @@ app.MapPost("/authorize", async Task<IResult> (
             Status = StatusCodes.Status400BadRequest,
         });
     }
+    catch (ArgumentException exception)
+    {
+        return TypedResults.BadRequest(new ProblemDetails
+        {
+            Title = "Authorization rejected",
+            Detail = exception.Message,
+            Status = StatusCodes.Status400BadRequest,
+        });
+    }
 });
 
 app.MapPost("/acknowledge", async Task<IResult> (
@@ -71,6 +80,15 @@ app.MapPost("/acknowledge", async Task<IResult> (
     catch (KeyNotFoundException)
     {
         return TypedResults.NotFound();
+    }
+    catch (ArgumentException exception)
+    {
+        return TypedResults.BadRequest(new ProblemDetails
+        {
+            Title = "Acknowledgment rejected",
+            Detail = exception.Message,
+            Status = StatusCodes.Status400BadRequest,
+        });
     }
     catch (InvalidOperationException exception)
     {
