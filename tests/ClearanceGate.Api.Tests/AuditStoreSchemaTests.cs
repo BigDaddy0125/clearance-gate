@@ -32,6 +32,37 @@ public sealed class AuditStoreSchemaTests
     }
 
     [Fact]
+    public async Task InitializeAsync_UpgradesLegacyUnversionedDatabaseAndPreservesData()
+    {
+        using var harness = CreateHarness();
+        SeedLegacyUnversionedDatabase(harness.DatabasePath);
+        var initializer = CreateInitializer(harness.DatabasePath);
+
+        await initializer.InitializeAsync(CancellationToken.None);
+
+        await using var connection = new SqliteConnection($"Data Source={harness.DatabasePath}");
+        await connection.OpenAsync();
+
+        var versionCommand = connection.CreateCommand();
+        versionCommand.CommandText =
+            """
+            SELECT value
+            FROM schema_metadata
+            WHERE key = $key;
+            """;
+        versionCommand.Parameters.AddWithValue("$key", ClearanceGate.Audit.AuditStoreSchema.SchemaVersionKey);
+
+        var version = await versionCommand.ExecuteScalarAsync();
+
+        var dataCommand = connection.CreateCommand();
+        dataCommand.CommandText = "SELECT COUNT(*) FROM decisions WHERE decision_id = 'legacy-decision';";
+        var dataCount = await dataCommand.ExecuteScalarAsync();
+
+        Assert.Equal(ClearanceGate.Audit.AuditStoreSchema.CurrentVersion.ToString(), Convert.ToString(version));
+        Assert.Equal(1L, Convert.ToInt64(dataCount));
+    }
+
+    [Fact]
     public void ApplicationStartup_RejectsUnsupportedAuditSchemaVersion()
     {
         using var harness = CreateHarness();
@@ -51,6 +82,78 @@ public sealed class AuditStoreSchemaTests
         });
 
         return new ClearanceGate.Audit.SqliteAuditStoreInitializer(options);
+    }
+
+    private static void SeedLegacyUnversionedDatabase(string databasePath)
+    {
+        var connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={databasePath}");
+        var directory = Path.GetDirectoryName(Path.GetFullPath(connectionStringBuilder.DataSource));
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var connection = new SqliteConnection(connectionStringBuilder.ToString());
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            CREATE TABLE decisions (
+                request_id TEXT NOT NULL PRIMARY KEY,
+                decision_id TEXT NOT NULL UNIQUE,
+                profile TEXT NOT NULL,
+                owner TEXT NOT NULL,
+                acknowledger_id TEXT NULL,
+                outcome TEXT NOT NULL,
+                clearance_state TEXT NOT NULL,
+                evidence_id TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                kernel_version TEXT NOT NULL,
+                policy_version TEXT NOT NULL
+            );
+
+            CREATE TABLE decision_constraints (
+                decision_id TEXT NOT NULL,
+                constraint_id TEXT NOT NULL,
+                PRIMARY KEY (decision_id, constraint_id),
+                FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE decision_timeline (
+                timeline_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                decision_id TEXT NOT NULL,
+                state TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
+            );
+
+            INSERT INTO decisions (
+                request_id,
+                decision_id,
+                profile,
+                owner,
+                acknowledger_id,
+                outcome,
+                clearance_state,
+                evidence_id,
+                summary,
+                kernel_version,
+                policy_version)
+            VALUES (
+                'legacy-request',
+                'legacy-decision',
+                'itops_deployment_v1',
+                'alice',
+                NULL,
+                'REQUIRE_ACK',
+                'AWAITING_ACK',
+                'evidence:legacy-decision',
+                'legacy summary',
+                'kernel-v1',
+                'policy-v1');
+            """;
+        command.ExecuteNonQuery();
     }
 
     private static void SeedUnsupportedSchemaVersion(string databasePath, int schemaVersion)

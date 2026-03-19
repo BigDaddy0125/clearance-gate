@@ -27,20 +27,13 @@ public sealed class SqliteAuditStoreInitializer(
         await EnsureSchemaMetadataAsync(connection, cancellationToken);
 
         var schemaVersion = await ReadSchemaVersionAsync(connection, cancellationToken);
-        switch (schemaVersion)
+        if (schemaVersion is > AuditStoreSchema.CurrentVersion)
         {
-            case null:
-                await ApplySchemaV1Async(connection, cancellationToken);
-                await WriteSchemaVersionAsync(connection, AuditStoreSchema.CurrentVersion, cancellationToken);
-                break;
-            case AuditStoreSchema.CurrentVersion:
-                await ApplySchemaV1Async(connection, cancellationToken);
-                break;
-            default:
-                throw new InvalidOperationException(
-                    $"Unsupported audit store schema version '{schemaVersion}'. Expected '{AuditStoreSchema.CurrentVersion}'.");
+            throw new InvalidOperationException(
+                $"Unsupported audit store schema version '{schemaVersion}'. Expected '{AuditStoreSchema.CurrentVersion}'.");
         }
 
+        await ApplyPendingMigrationsAsync(connection, schemaVersion, cancellationToken);
         await EnsureRequiredTablesExistAsync(connection, cancellationToken);
     }
 
@@ -97,43 +90,17 @@ public sealed class SqliteAuditStoreInitializer(
             $"Audit store schema version '{rawValue}' is not a valid integer.");
     }
 
-    private static async Task ApplySchemaV1Async(
+    private static async Task ApplyPendingMigrationsAsync(
         SqliteConnection connection,
+        int? currentVersion,
         CancellationToken cancellationToken)
     {
-        var command = connection.CreateCommand();
-        command.CommandText =
-            """
-            CREATE TABLE IF NOT EXISTS decisions (
-                request_id TEXT NOT NULL PRIMARY KEY,
-                decision_id TEXT NOT NULL UNIQUE,
-                profile TEXT NOT NULL,
-                owner TEXT NOT NULL,
-                acknowledger_id TEXT NULL,
-                outcome TEXT NOT NULL,
-                clearance_state TEXT NOT NULL,
-                evidence_id TEXT NOT NULL,
-                summary TEXT NOT NULL,
-                kernel_version TEXT NOT NULL,
-                policy_version TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS decision_constraints (
-                decision_id TEXT NOT NULL,
-                constraint_id TEXT NOT NULL,
-                PRIMARY KEY (decision_id, constraint_id),
-                FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
-            );
-
-            CREATE TABLE IF NOT EXISTS decision_timeline (
-                timeline_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                decision_id TEXT NOT NULL,
-                state TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
-            );
-            """;
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        var effectiveVersion = currentVersion ?? 0;
+        foreach (var migration in Migrations.Where(migration => migration.TargetVersion > effectiveVersion))
+        {
+            await migration.ApplyAsync(connection, cancellationToken);
+            await WriteSchemaVersionAsync(connection, migration.TargetVersion, cancellationToken);
+        }
     }
 
     private static async Task WriteSchemaVersionAsync(
@@ -184,5 +151,47 @@ public sealed class SqliteAuditStoreInitializer(
         "decisions",
         "decision_constraints",
         "decision_timeline",
+    ];
+
+    private static readonly AuditStoreSchemaMigration[] Migrations =
+    [
+        new(
+            1,
+            async (connection, cancellationToken) =>
+            {
+                var command = connection.CreateCommand();
+                command.CommandText =
+                    """
+                    CREATE TABLE IF NOT EXISTS decisions (
+                        request_id TEXT NOT NULL PRIMARY KEY,
+                        decision_id TEXT NOT NULL UNIQUE,
+                        profile TEXT NOT NULL,
+                        owner TEXT NOT NULL,
+                        acknowledger_id TEXT NULL,
+                        outcome TEXT NOT NULL,
+                        clearance_state TEXT NOT NULL,
+                        evidence_id TEXT NOT NULL,
+                        summary TEXT NOT NULL,
+                        kernel_version TEXT NOT NULL,
+                        policy_version TEXT NOT NULL
+                    );
+
+                    CREATE TABLE IF NOT EXISTS decision_constraints (
+                        decision_id TEXT NOT NULL,
+                        constraint_id TEXT NOT NULL,
+                        PRIMARY KEY (decision_id, constraint_id),
+                        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
+                    );
+
+                    CREATE TABLE IF NOT EXISTS decision_timeline (
+                        timeline_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        decision_id TEXT NOT NULL,
+                        state TEXT NOT NULL,
+                        timestamp TEXT NOT NULL,
+                        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
+                    );
+                    """;
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }),
     ];
 }
