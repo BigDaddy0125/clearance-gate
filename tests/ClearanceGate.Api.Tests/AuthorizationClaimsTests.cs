@@ -134,10 +134,34 @@ public sealed class AuthorizationClaimsTests
             var auditPayload = await secondClient.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-4");
 
             Assert.NotNull(auditPayload);
+            Assert.Equal("evidence:dec-claim-4", auditPayload.EvidenceId);
             Assert.Equal("REQUIRE_ACK", auditPayload.Outcome);
             Assert.Single(auditPayload.AuthorizationTimeline);
             Assert.Equal("AWAITING_ACK", auditPayload.AuthorizationTimeline[0].State);
         }
+    }
+
+    // CG4: a non-blocking outcome is immediately backed by durable evidence and timeline
+    [Fact]
+    public async Task NonBlockingOutcome_ImmediatelyExposesDurableEvidenceInAudit()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-4b", "dec-claim-4b", new[] { "HIGH_IMPACT" }, "alice", "change-control");
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var authorizePayload = await authorizeResponse.Content.ReadFromJsonAsync<ClearanceGate.Contracts.AuthorizationResponse>();
+        var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-4b");
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.NotNull(authorizePayload);
+        Assert.NotNull(auditPayload);
+        Assert.Equal("REQUIRE_ACK", authorizePayload.Outcome);
+        Assert.Equal(authorizePayload.EvidenceId, auditPayload.EvidenceId);
+        Assert.Equal(authorizePayload.DecisionId, auditPayload.DecisionId);
+        Assert.Single(auditPayload.AuthorizationTimeline);
+        Assert.Equal("AWAITING_ACK", auditPayload.AuthorizationTimeline[0].State);
     }
 
     // CG6: unknown profile is rejected fail-closed

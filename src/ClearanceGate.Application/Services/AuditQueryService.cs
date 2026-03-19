@@ -15,6 +15,7 @@ public sealed class AuditQueryService(
 
         var response = new ClearanceGate.Contracts.AuditRecordResponse(
             record.DecisionId,
+            record.EvidenceId,
             record.Timeline
                 .Select(item => new ClearanceGate.Contracts.AuditTimelineItem(item.State, item.Timestamp))
                 .ToArray(),

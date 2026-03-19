@@ -2,6 +2,7 @@ namespace ClearanceGate.Contracts;
 
 public sealed record AuditRecordResponse(
     string DecisionId,
+    string EvidenceId,
     IReadOnlyList<AuditTimelineItem> AuthorizationTimeline,
     string Outcome,
     AuditResponsibility Responsibility,

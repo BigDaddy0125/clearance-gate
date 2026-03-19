@@ -99,6 +99,8 @@ Runtime anchors:
 Executable anchors:
 
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
+  `NonBlockingOutcome_ImmediatelyExposesDurableEvidenceInAudit`
+- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
   `AuditEvidence_RemainsReadableAfterApplicationRestart`
 
 CI path:
