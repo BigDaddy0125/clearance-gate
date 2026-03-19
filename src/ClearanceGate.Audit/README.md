@@ -7,3 +7,4 @@ Planned responsibilities:
 - append-only evidence persistence
 - durable write before non-blocking outcome emission
 - audit replay timeline construction
+- schema-versioned SQLite initialization with fail-closed startup on unsupported versions

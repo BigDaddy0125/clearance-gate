@@ -23,11 +23,87 @@ public sealed class SqliteAuditStoreInitializer(
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
+        await ConfigurePragmasAsync(connection, cancellationToken);
+        await EnsureSchemaMetadataAsync(connection, cancellationToken);
+
+        var schemaVersion = await ReadSchemaVersionAsync(connection, cancellationToken);
+        switch (schemaVersion)
+        {
+            case null:
+                await ApplySchemaV1Async(connection, cancellationToken);
+                await WriteSchemaVersionAsync(connection, AuditStoreSchema.CurrentVersion, cancellationToken);
+                break;
+            case AuditStoreSchema.CurrentVersion:
+                await ApplySchemaV1Async(connection, cancellationToken);
+                break;
+            default:
+                throw new InvalidOperationException(
+                    $"Unsupported audit store schema version '{schemaVersion}'. Expected '{AuditStoreSchema.CurrentVersion}'.");
+        }
+
+        await EnsureRequiredTablesExistAsync(connection, cancellationToken);
+    }
+
+    private static async Task ConfigurePragmasAsync(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA journal_mode = WAL;";
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task EnsureSchemaMetadataAsync(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
         var command = connection.CreateCommand();
         command.CommandText =
             """
-            PRAGMA journal_mode = WAL;
+            CREATE TABLE IF NOT EXISTS schema_metadata (
+                key TEXT NOT NULL PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            """;
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
 
+    private static async Task<int?> ReadSchemaVersionAsync(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT value
+            FROM schema_metadata
+            WHERE key = $key;
+            """;
+        command.Parameters.AddWithValue("$key", AuditStoreSchema.SchemaVersionKey);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        if (result is null || result is DBNull)
+        {
+            return null;
+        }
+
+        var rawValue = Convert.ToString(result);
+        if (int.TryParse(rawValue, out var parsedVersion))
+        {
+            return parsedVersion;
+        }
+
+        throw new InvalidOperationException(
+            $"Audit store schema version '{rawValue}' is not a valid integer.");
+    }
+
+    private static async Task ApplySchemaV1Async(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
             CREATE TABLE IF NOT EXISTS decisions (
                 request_id TEXT NOT NULL PRIMARY KEY,
                 decision_id TEXT NOT NULL UNIQUE,
@@ -57,7 +133,56 @@ public sealed class SqliteAuditStoreInitializer(
                 FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
             );
             """;
-
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
+
+    private static async Task WriteSchemaVersionAsync(
+        SqliteConnection connection,
+        int schemaVersion,
+        CancellationToken cancellationToken)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            INSERT INTO schema_metadata (key, value)
+            VALUES ($key, $value)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+            """;
+        command.Parameters.AddWithValue("$key", AuditStoreSchema.SchemaVersionKey);
+        command.Parameters.AddWithValue("$value", schemaVersion.ToString());
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static async Task EnsureRequiredTablesExistAsync(
+        SqliteConnection connection,
+        CancellationToken cancellationToken)
+    {
+        foreach (var tableName in RequiredTables)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                SELECT 1
+                FROM sqlite_master
+                WHERE type = 'table'
+                  AND name = $name;
+                """;
+            command.Parameters.AddWithValue("$name", tableName);
+
+            var exists = await command.ExecuteScalarAsync(cancellationToken) is not null;
+            if (!exists)
+            {
+                throw new InvalidOperationException(
+                    $"Audit store schema is incomplete. Required table '{tableName}' is missing.");
+            }
+        }
+    }
+
+    private static readonly string[] RequiredTables =
+    [
+        "schema_metadata",
+        "decisions",
+        "decision_constraints",
+        "decision_timeline",
+    ];
 }
