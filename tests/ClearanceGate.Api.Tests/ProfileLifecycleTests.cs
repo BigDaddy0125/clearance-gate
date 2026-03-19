@@ -63,6 +63,95 @@ public sealed class ProfileLifecycleTests
     }
 
     [Fact]
+    public void ProfileCatalogValidator_RejectsMissingRequiredKernelRole()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                ResponsibilityRoles = new[]
+                {
+                    ClearanceGate.Profiles.KernelResponsibilityRoles.DecisionOwner,
+                    ClearanceGate.Profiles.KernelResponsibilityRoles.AcknowledgingAuthority,
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("missing required role 'audit_reviewer'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProfileCatalogValidator_RejectsUnsupportedConstraintKind()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                Constraints = new[]
+                {
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint("X", "manual_override", null, null),
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("unsupported constraint kind 'manual_override'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProfileCatalogValidator_RejectsUnsupportedRequiredField()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                Constraints = new[]
+                {
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint(
+                        "FIELD_REQUIRED",
+                        ClearanceGate.Profiles.ProfileConstraintKinds.RequiredField,
+                        "metadata.operator_id",
+                        null),
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("unsupported required field 'metadata.operator_id'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProfileCatalogValidator_RejectsAckConstraintWithoutRiskFlag()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                Constraints = new[]
+                {
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint(
+                        "RISK_ACK_REQUIRED",
+                        ClearanceGate.Profiles.ProfileConstraintKinds.AckRequired,
+                        null,
+                        null),
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("must specify whenRiskFlagPresent", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ProfileCatalogValidator_AllowsDistinctVersionsWithinSameFamily()
     {
         var profiles = new[]

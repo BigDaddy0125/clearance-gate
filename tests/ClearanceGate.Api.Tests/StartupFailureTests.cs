@@ -80,6 +80,27 @@ public sealed class StartupFailureTests
         Assert.Contains("Audit store connection string must not be empty", exception.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ApplicationStartup_RejectsAuditStoreConfigurationWithoutDataSource()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(
+            harness.DatabasePath,
+            services =>
+            {
+                services.AddSingleton<IValidateOptions<ClearanceGate.Audit.AuditStoreOptions>, ClearanceGate.Audit.AuditStoreOptionsValidator>();
+                services.PostConfigure<ClearanceGate.Audit.AuditStoreOptions>(options =>
+                {
+                    options.ConnectionString = "Mode=Memory";
+                });
+            });
+
+        var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+
+        Assert.Contains("ClearanceGate startup validation failed", exception.ToString(), StringComparison.Ordinal);
+        Assert.Contains("must define a SQLite data source", exception.ToString(), StringComparison.Ordinal);
+    }
+
     private static TemporaryDatabaseHarness CreateHarness()
     {
         var path = Path.Combine(Path.GetTempPath(), $"clearancegate-startup-tests-{Guid.NewGuid():N}.db");

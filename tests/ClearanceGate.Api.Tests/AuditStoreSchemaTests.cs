@@ -74,6 +74,30 @@ public sealed class AuditStoreSchemaTests
         Assert.Contains("Unsupported audit store schema version", exception.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ApplicationStartup_RejectsNonIntegerAuditSchemaVersion()
+    {
+        using var harness = CreateHarness();
+        SeedSchemaVersionValue(harness.DatabasePath, "v-next");
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+
+        var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+
+        Assert.Contains("schema version 'v-next' is not a valid integer", exception.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_RejectsIncompleteCurrentSchema()
+    {
+        using var harness = CreateHarness();
+        SeedIncompleteCurrentSchema(harness.DatabasePath);
+        var initializer = CreateInitializer(harness.DatabasePath);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => initializer.InitializeAsync(CancellationToken.None));
+
+        Assert.Contains("Required table 'decision_timeline' is missing", exception.Message, StringComparison.Ordinal);
+    }
+
     private static ClearanceGate.Audit.SqliteAuditStoreInitializer CreateInitializer(string databasePath)
     {
         var options = Options.Create(new ClearanceGate.Audit.AuditStoreOptions
@@ -158,6 +182,11 @@ public sealed class AuditStoreSchemaTests
 
     private static void SeedUnsupportedSchemaVersion(string databasePath, int schemaVersion)
     {
+        SeedSchemaVersionValue(databasePath, schemaVersion.ToString());
+    }
+
+    private static void SeedSchemaVersionValue(string databasePath, string schemaVersion)
+    {
         var connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={databasePath}");
         var directory = Path.GetDirectoryName(Path.GetFullPath(connectionStringBuilder.DataSource));
         if (!string.IsNullOrWhiteSpace(directory))
@@ -181,7 +210,55 @@ public sealed class AuditStoreSchemaTests
             ON CONFLICT(key) DO UPDATE SET value = excluded.value;
             """;
         command.Parameters.AddWithValue("$key", ClearanceGate.Audit.AuditStoreSchema.SchemaVersionKey);
-        command.Parameters.AddWithValue("$value", schemaVersion.ToString());
+        command.Parameters.AddWithValue("$value", schemaVersion);
+        command.ExecuteNonQuery();
+    }
+
+    private static void SeedIncompleteCurrentSchema(string databasePath)
+    {
+        var connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={databasePath}");
+        var directory = Path.GetDirectoryName(Path.GetFullPath(connectionStringBuilder.DataSource));
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var connection = new SqliteConnection(connectionStringBuilder.ToString());
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            CREATE TABLE schema_metadata (
+                key TEXT NOT NULL PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+
+            INSERT INTO schema_metadata (key, value)
+            VALUES ($key, $value);
+
+            CREATE TABLE decisions (
+                request_id TEXT NOT NULL PRIMARY KEY,
+                decision_id TEXT NOT NULL UNIQUE,
+                profile TEXT NOT NULL,
+                owner TEXT NOT NULL,
+                acknowledger_id TEXT NULL,
+                outcome TEXT NOT NULL,
+                clearance_state TEXT NOT NULL,
+                evidence_id TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                kernel_version TEXT NOT NULL,
+                policy_version TEXT NOT NULL
+            );
+
+            CREATE TABLE decision_constraints (
+                decision_id TEXT NOT NULL,
+                constraint_id TEXT NOT NULL,
+                PRIMARY KEY (decision_id, constraint_id)
+            );
+            """;
+        command.Parameters.AddWithValue("$key", ClearanceGate.Audit.AuditStoreSchema.SchemaVersionKey);
+        command.Parameters.AddWithValue("$value", ClearanceGate.Audit.AuditStoreSchema.CurrentVersion.ToString());
         command.ExecuteNonQuery();
     }
 
