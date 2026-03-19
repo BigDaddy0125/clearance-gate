@@ -37,3 +37,8 @@ Current environment note:
 
 - `dotnet` SDK and Java are expected locally for runtime claim tests and TLC runs
 - use `powershell -ExecutionPolicy Bypass -File .\scripts\run-tlc.ps1 -IncludeRed` to run the formal regression suite on Windows
+
+Operational note:
+
+- startup performs fail-closed validation of embedded profiles and the audit store schema before serving requests
+- unsupported audit schema versions or invalid profile catalogs must stop the process rather than degrade open

@@ -8,10 +8,12 @@ namespace ClearanceGate.Api.Tests;
 public sealed class ClearanceGateApiFactory : WebApplicationFactory<Program>
 {
     private readonly string databasePath;
+    private readonly Action<IServiceCollection>? configureTestServices;
 
-    public ClearanceGateApiFactory(string databasePath)
+    public ClearanceGateApiFactory(string databasePath, Action<IServiceCollection>? configureTestServices = null)
     {
         this.databasePath = databasePath;
+        this.configureTestServices = configureTestServices;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -22,6 +24,8 @@ public sealed class ClearanceGateApiFactory : WebApplicationFactory<Program>
             {
                 options.ConnectionString = $"Data Source={databasePath}";
             });
+
+            configureTestServices?.Invoke(services);
         });
     }
 }

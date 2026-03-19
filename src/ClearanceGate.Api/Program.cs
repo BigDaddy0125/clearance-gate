@@ -33,8 +33,10 @@ builder.Services.AddSingleton<ClearanceGate.Application.Abstractions.IAuditQuery
 
 var app = builder.Build();
 
-await app.Services.GetRequiredService<ClearanceGate.Audit.IAuditStoreInitializer>()
-    .InitializeAsync(CancellationToken.None);
+await ClearanceGate.Api.StartupValidation.ValidateAsync(
+    app.Services,
+    app.Logger,
+    CancellationToken.None);
 
 app.UseExceptionHandler();
 
