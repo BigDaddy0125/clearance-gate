@@ -1,5 +1,5 @@
 ------------------------------ MODULE RequestIdempotency ------------------------------
-EXTENDS FiniteSets
+EXTENDS FiniteSets, Sequences
 
 (******************************************************************************
 * Claim:

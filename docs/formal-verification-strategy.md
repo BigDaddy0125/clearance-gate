@@ -239,7 +239,7 @@ Current implementation status:
 
 - CG1 and CG2 have green/red TLA coverage
 - CG3 and CG5 have green/red TLA coverage plus runtime claim tests
-- CG4 currently has runtime durable-store coverage and should get a dedicated TLA model next
+- CG4 has green/red TLA coverage plus runtime durable-store coverage
 
 ### Phase D: Profile conformance
 

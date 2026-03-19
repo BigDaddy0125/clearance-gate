@@ -33,4 +33,5 @@ Important constraints:
 
 Current environment note:
 
-- `dotnet` SDK is not installed on this machine yet, so the .NET skeleton in `src/` is design-first and has not been built locally
+- `dotnet` SDK and Java are expected locally for runtime claim tests and TLC runs
+- use `powershell -ExecutionPolicy Bypass -File .\scripts\run-tlc.ps1 -IncludeRed` to run the formal regression suite on Windows

@@ -30,7 +30,8 @@ AckResultBad(s, constraints) ==
 Inv_AckOnlyAuthorizesAwaitingAck ==
   \A s \in DecisionStates:
     \A constraints \in SUBSET ConstraintUniverse:
-      AckResultBad(s, constraints) = AuthorizedState =>
+      ((s # AuthorizedState)
+        /\ AckResultBad(s, constraints) = AuthorizedState) =>
         /\ s = AwaitingAckState
         /\ AckRequiredConstraint \in constraints
 

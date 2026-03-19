@@ -71,7 +71,13 @@ Statement:
 
 Spec:
 
-- planned
+- `tla/specs/DurableEvidenceGate.tla`
+- `tla/specs/DurableEvidenceGate_BadEarlyEmit.tla`
+
+Models:
+
+- `tla/models/durable_evidence_ok.cfg`
+- `tla/models/durable_evidence_negative_early_emit.cfg`
 
 Executable coverage:
 

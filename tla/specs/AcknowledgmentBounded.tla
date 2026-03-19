@@ -37,7 +37,8 @@ AckResult(s, constraints) ==
 Inv_AckOnlyAuthorizesAwaitingAck ==
   \A s \in DecisionStates:
     \A constraints \in SUBSET ConstraintUniverse:
-      AckResult(s, constraints) = AuthorizedState =>
+      ((s # AuthorizedState)
+        /\ AckResult(s, constraints) = AuthorizedState) =>
         /\ s = AwaitingAckState
         /\ AckRequiredConstraint \in constraints
 

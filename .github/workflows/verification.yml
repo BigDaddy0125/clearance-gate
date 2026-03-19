@@ -1,0 +1,45 @@
+name: verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  claims:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Download TLC tools
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path .\tools | Out-Null
+          Invoke-WebRequest `
+            -Uri https://github.com/tlaplus/tlaplus/releases/latest/download/tla2tools.jar `
+            -OutFile .\tools\tla2tools.jar
+
+      - name: Restore
+        run: dotnet restore .\ClearanceGate.slnx
+
+      - name: Runtime claim tests
+        run: dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj --configuration Release --no-restore
+
+      - name: TLC green models
+        shell: pwsh
+        run: .\scripts\run-tlc.ps1
+
+      - name: TLC red models
+        shell: pwsh
+        run: .\scripts\run-tlc.ps1 -IncludeRed

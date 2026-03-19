@@ -14,9 +14,9 @@ Initial model set:
 - kernel outcome exclusivity
 - fail-closed behavior
 - acknowledgment boundedness
+- durable evidence before non-blocking outcome
 - request idempotency
 
 Planned model set:
 
-- auditability reachability
 - profile conformance

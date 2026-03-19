@@ -1,5 +1,5 @@
 ------------------------------ MODULE RequestIdempotency_BadOverwrite ------------------------------
-EXTENDS FiniteSets
+EXTENDS FiniteSets, Sequences
 
 (******************************************************************************
 * Negative model: replay overwrites the first durable decision.
