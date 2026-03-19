@@ -241,6 +241,7 @@ Current implementation status:
 - CG3 and CG5 have green/red TLA coverage plus runtime claim tests
 - CG4 has green/red TLA coverage plus runtime durable-store coverage
 - CG6 has green/red TLA coverage for profile conformance, and the green model now derives profile role/kind metadata from the real profile JSON
+- CG6 also has a dedicated role-conformance TLA variant for authorize/acknowledge boundary roles
 
 ### Phase D: Profile conformance
 

@@ -43,3 +43,13 @@ jobs:
       - name: TLC red models
         shell: pwsh
         run: .\scripts\run-tlc.ps1 -IncludeRed
+
+      - name: Publish TLC summary
+        shell: pwsh
+        run: Get-Content .\artifacts\tlc\summary.md >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload TLC artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tlc-logs
+          path: artifacts/tlc

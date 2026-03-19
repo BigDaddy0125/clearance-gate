@@ -21,3 +21,8 @@ Initial model set:
 The profile conformance green config is generated from the checked-in profile JSON:
 
 - `powershell -ExecutionPolicy Bypass -File .\scripts\generate-profile-tla-config.ps1`
+
+The TLC runner writes:
+
+- logs under `artifacts/tlc/`
+- a Markdown summary at `artifacts/tlc/summary.md`

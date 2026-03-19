@@ -27,9 +27,13 @@ $resolvedOutputRootInput =
 $resolvedJar = (Resolve-Path $resolvedTlaToolsJarInput).Path
 $resolvedOutputRoot = [System.IO.Path]::GetFullPath($resolvedOutputRootInput)
 [System.IO.Directory]::CreateDirectory($resolvedOutputRoot) | Out-Null
+$runId = [Guid]::NewGuid().ToString("N")
 
 $profileConfigOutputPath = Join-Path $repoRoot "generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
-& (Join-Path $PSScriptRoot "generate-profile-tla-config.ps1") -OutputPath $profileConfigOutputPath
+$profileRoleConfigOutputPath = Join-Path $repoRoot "generated\\tla\\itops_deployment_v1_profile_role_conformance.cfg"
+& (Join-Path $PSScriptRoot "generate-profile-tla-config.ps1") `
+    -OutputPath $profileConfigOutputPath `
+    -RoleOutputPath $profileRoleConfigOutputPath
 
 $models = @(
     @{
@@ -60,6 +64,12 @@ $models = @(
         Name = "profile_conformance_ok"
         Spec = ".\\tla\\specs\\ProfileConformance.tla"
         Config = ".\\generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
+        ExpectSuccess = $true
+    },
+    @{
+        Name = "profile_role_conformance_ok"
+        Spec = ".\\tla\\specs\\ProfileRoleConformance.tla"
+        Config = ".\\generated\\tla\\itops_deployment_v1_profile_role_conformance.cfg"
         ExpectSuccess = $true
     }
 )
@@ -100,19 +110,27 @@ if ($IncludeRed) {
             Config = ".\\tla\\models\\profile_conformance_negative_implicit_allow.cfg"
             ExpectSuccess = $false
             ExpectedViolation = "Inv_ProfileUsesOnlyKernelOutcomes"
+        },
+        @{
+            Name = "profile_role_conformance_negative_role_bypass"
+            Spec = ".\\tla\\specs\\ProfileRoleConformance_BadRoleBypass.tla"
+            Config = ".\\tla\\models\\profile_role_conformance_negative_role_bypass.cfg"
+            ExpectSuccess = $false
+            ExpectedViolation = "Inv_ProfileDeclaresAcknowledgmentRole"
         }
     )
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
+$results = New-Object System.Collections.Generic.List[object]
 
 foreach ($model in $models) {
     $specPath = $model.Spec
     $configPath = $model.Config
-    $metaDir = Join-Path $resolvedOutputRoot ("meta-" + $model.Name)
+    $metaDir = Join-Path $resolvedOutputRoot ("meta-" + $runId + "-" + $model.Name)
     $logPath = Join-Path $resolvedOutputRoot ($model.Name + ".log")
-    $stdoutPath = Join-Path $resolvedOutputRoot ($model.Name + ".stdout.tmp")
-    $stderrPath = Join-Path $resolvedOutputRoot ($model.Name + ".stderr.tmp")
+    $stdoutPath = Join-Path $resolvedOutputRoot ($model.Name + "." + $runId + ".stdout.tmp")
+    $stderrPath = Join-Path $resolvedOutputRoot ($model.Name + "." + $runId + ".stderr.tmp")
 
     if (Test-Path $metaDir) {
         Remove-Item -Recurse -Force $metaDir -ErrorAction SilentlyContinue
@@ -160,10 +178,12 @@ foreach ($model in $models) {
     if ($model.ExpectSuccess) {
         if ($exitCode -eq 0) {
             Write-Host ("PASS " + $model.Name)
+            $results.Add([pscustomobject]@{ Name = $model.Name; Status = "PASS"; Log = $logPath }) | Out-Null
         }
         else {
             $failures.Add("Green model '$($model.Name)' failed unexpectedly. See $logPath")
             Write-Host ("FAIL " + $model.Name)
+            $results.Add([pscustomobject]@{ Name = $model.Name; Status = "FAIL"; Log = $logPath }) | Out-Null
         }
 
         continue
@@ -176,15 +196,30 @@ foreach ($model in $models) {
 
     if ($sawInvariantViolation) {
         Write-Host ("EXPECTED-FAIL " + $model.Name)
+        $results.Add([pscustomobject]@{ Name = $model.Name; Status = "EXPECTED-FAIL"; Log = $logPath }) | Out-Null
     }
     else {
         $failures.Add("Red model '$($model.Name)' did not fail with expected invariant '$expectedViolation'. See $logPath")
         Write-Host ("FAIL " + $model.Name)
+        $results.Add([pscustomobject]@{ Name = $model.Name; Status = "FAIL"; Log = $logPath }) | Out-Null
     }
 }
 
 Write-Host ""
 Write-Host ("Logs: " + $resolvedOutputRoot)
+
+$summaryPath = Join-Path $resolvedOutputRoot "summary.md"
+$summaryLines = @(
+    "# TLC Results",
+    "",
+    "| Model | Status | Log |",
+    "| --- | --- | --- |"
+)
+$summaryLines += $results | ForEach-Object {
+    "| $($_.Name) | $($_.Status) | $($_.Log) |"
+}
+Set-Content -Path $summaryPath -Value $summaryLines
+Write-Host ("Summary: " + $summaryPath)
 
 if ($failures.Count -gt 0) {
     Write-Host ""

@@ -116,11 +116,15 @@ Spec:
 
 - `tla/specs/ProfileConformance.tla`
 - `tla/specs/ProfileConformance_BadImplicitAllow.tla`
+- `tla/specs/ProfileRoleConformance.tla`
+- `tla/specs/ProfileRoleConformance_BadRoleBypass.tla`
 
 Models:
 
 - generated from `src/ClearanceGate.Profiles/itops_deployment_v1.json` via `scripts/generate-profile-tla-config.ps1`
 - `tla/models/profile_conformance_negative_implicit_allow.cfg`
+- generated role config via `scripts/generate-profile-tla-config.ps1`
+- `tla/models/profile_role_conformance_negative_role_bypass.cfg`
 
 Runtime anchors:
 
