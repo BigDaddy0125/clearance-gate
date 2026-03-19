@@ -62,6 +62,31 @@ public sealed class ProfileLifecycleTests
         Assert.Contains("non-empty description", exception.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ProfileCatalogValidator_AllowsDistinctVersionsWithinSameFamily()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1"), "profile-a.json"),
+            (CreateProfile("itops_deployment_v2"), "profile-b.json"),
+        };
+
+        var catalog = ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles);
+
+        Assert.Equal(2, catalog.Count);
+        Assert.Contains("itops_deployment_v1", catalog.Keys);
+        Assert.Contains("itops_deployment_v2", catalog.Keys);
+    }
+
+    [Fact]
+    public void ProfileVersionIdentity_TryParse_ReturnsFalseForInvalidName()
+    {
+        var parsed = ClearanceGate.Profiles.ProfileVersionIdentity.TryParse("bad-profile-name", out var identity);
+
+        Assert.False(parsed);
+        Assert.Null(identity);
+    }
+
     private static ClearanceGate.Profiles.ClearanceProfile CreateProfile(string profileName) =>
         new(
             profileName,

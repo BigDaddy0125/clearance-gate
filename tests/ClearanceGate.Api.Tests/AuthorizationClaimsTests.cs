@@ -219,6 +219,66 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("REQUIRE_ACK", exportPayload.Outcome);
     }
 
+    [Fact]
+    public async Task AuditExport_AfterAcknowledgmentReflectsAuthorizedState()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-export-3", "dec-claim-export-3", new[] { "HIGH_IMPACT" }, "alice", "change-control");
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var acknowledgeResponse = await client.PostAsJsonAsync("/acknowledge", new ClearanceGate.Contracts.AcknowledgmentRequest(
+            "dec-claim-export-3",
+            new ClearanceGate.Contracts.Acknowledger("alice", "acknowledging_authority"),
+            new ClearanceGate.Contracts.AcknowledgmentPayload("risk_acceptance", "2026-03-18T10:05:00Z")));
+        var exportPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditExportResponse>("/audit/request/req-claim-export-3/export");
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, acknowledgeResponse.StatusCode);
+        Assert.NotNull(exportPayload);
+        Assert.Equal("PROCEED", exportPayload.Outcome);
+        Assert.Equal("AUTHORIZED", exportPayload.ClearanceState);
+        Assert.Equal("alice", exportPayload.Responsibility.Acknowledger);
+        Assert.Equal(new[] { "AWAITING_ACK", "AUTHORIZED" }, exportPayload.AuthorizationTimeline.Select(item => item.State));
+    }
+
+    [Fact]
+    public async Task AuditByRequestId_UnknownRequestIdReturnsNotFound()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/audit/request/req-missing");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AuditExport_UnknownDecisionIdReturnsNotFound()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/audit/dec-missing/export");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AuditExport_UnknownRequestIdReturnsNotFound()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/audit/request/req-missing/export");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     // CG6: unknown profile is rejected fail-closed
     [Fact]
     public async Task UnknownProfile_IsRejectedFailClosed()
