@@ -6,7 +6,15 @@ public interface IAuditQueryService
         string decisionId,
         CancellationToken cancellationToken);
 
+    Task<ClearanceGate.Contracts.AuditRecordResponse?> GetAuditByRequestIdAsync(
+        string requestId,
+        CancellationToken cancellationToken);
+
     Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditAsync(
         string decisionId,
+        CancellationToken cancellationToken);
+
+    Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditByRequestIdAsync(
+        string requestId,
         CancellationToken cancellationToken);
 }

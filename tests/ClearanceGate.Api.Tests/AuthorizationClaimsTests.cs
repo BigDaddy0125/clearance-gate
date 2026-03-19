@@ -188,6 +188,37 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("AWAITING_ACK", exportPayload.AuthorizationTimeline[0].State);
     }
 
+    [Fact]
+    public async Task AuditByRequestId_ResolvesCanonicalDecisionAndExport()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var requests = Enumerable.Range(0, 3)
+            .Select(index => BuildAuthorizationRequest(
+                "req-claim-export-2",
+                $"dec-claim-export-2-{index}",
+                new[] { "HIGH_IMPACT" },
+                "alice",
+                "change-control"))
+            .ToArray();
+
+        var responses = await Task.WhenAll(requests.Select(request => client.PostAsJsonAsync("/authorize", request)));
+        var payloads = await Task.WhenAll(responses.Select(response => response.Content.ReadFromJsonAsync<ClearanceGate.Contracts.AuthorizationResponse>()));
+        var canonicalDecisionId = payloads.Select(payload => payload!.DecisionId).Distinct(StringComparer.Ordinal).Single();
+
+        var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/request/req-claim-export-2");
+        var exportPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditExportResponse>("/audit/request/req-claim-export-2/export");
+
+        Assert.All(responses, response => Assert.Equal(HttpStatusCode.OK, response.StatusCode));
+        Assert.NotNull(auditPayload);
+        Assert.NotNull(exportPayload);
+        Assert.Equal(canonicalDecisionId, auditPayload.DecisionId);
+        Assert.Equal(canonicalDecisionId, exportPayload.DecisionId);
+        Assert.Equal("req-claim-export-2", exportPayload.RequestId);
+        Assert.Equal("REQUIRE_ACK", exportPayload.Outcome);
+    }
+
     // CG6: unknown profile is rejected fail-closed
     [Fact]
     public async Task UnknownProfile_IsRejectedFailClosed()

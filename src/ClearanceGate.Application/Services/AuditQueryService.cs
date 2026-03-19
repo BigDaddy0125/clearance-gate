@@ -7,13 +7,38 @@ public sealed class AuditQueryService(
         string decisionId,
         CancellationToken cancellationToken)
     {
-        var record = auditStore.GetByDecisionId(decisionId);
+        return Task.FromResult(MapAuditRecord(auditStore.GetByDecisionId(decisionId)));
+    }
+
+    public Task<ClearanceGate.Contracts.AuditRecordResponse?> GetAuditByRequestIdAsync(
+        string requestId,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(MapAuditRecord(auditStore.GetByRequestId(requestId)));
+    }
+
+    public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditAsync(
+        string decisionId,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(MapAuditExport(auditStore.GetByDecisionId(decisionId)));
+    }
+
+    public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditByRequestIdAsync(
+        string requestId,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(MapAuditExport(auditStore.GetByRequestId(requestId)));
+    }
+
+    private static ClearanceGate.Contracts.AuditRecordResponse? MapAuditRecord(ClearanceGate.Audit.DecisionAuditRecord? record)
+    {
         if (record is null)
         {
-            return Task.FromResult<ClearanceGate.Contracts.AuditRecordResponse?>(null);
+            return null;
         }
 
-        var response = new ClearanceGate.Contracts.AuditRecordResponse(
+        return new ClearanceGate.Contracts.AuditRecordResponse(
             record.DecisionId,
             record.EvidenceId,
             MapTimeline(record),
@@ -21,21 +46,16 @@ public sealed class AuditQueryService(
             new ClearanceGate.Contracts.AuditResponsibility(record.Owner, record.AcknowledgerId ?? string.Empty),
             record.ConstraintsApplied.ToArray(),
             new ClearanceGate.Contracts.VersionInfo(record.KernelVersion, record.PolicyVersion));
-
-        return Task.FromResult<ClearanceGate.Contracts.AuditRecordResponse?>(response);
     }
 
-    public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditAsync(
-        string decisionId,
-        CancellationToken cancellationToken)
+    private static ClearanceGate.Contracts.AuditExportResponse? MapAuditExport(ClearanceGate.Audit.DecisionAuditRecord? record)
     {
-        var record = auditStore.GetByDecisionId(decisionId);
         if (record is null)
         {
-            return Task.FromResult<ClearanceGate.Contracts.AuditExportResponse?>(null);
+            return null;
         }
 
-        var response = new ClearanceGate.Contracts.AuditExportResponse(
+        return new ClearanceGate.Contracts.AuditExportResponse(
             record.DecisionId,
             record.RequestId,
             record.Profile,
@@ -47,8 +67,6 @@ public sealed class AuditQueryService(
             record.ConstraintsApplied.ToArray(),
             MapTimeline(record),
             new ClearanceGate.Contracts.VersionInfo(record.KernelVersion, record.PolicyVersion));
-
-        return Task.FromResult<ClearanceGate.Contracts.AuditExportResponse?>(response);
     }
 
     private static ClearanceGate.Contracts.AuditTimelineItem[] MapTimeline(ClearanceGate.Audit.DecisionAuditRecord record) =>

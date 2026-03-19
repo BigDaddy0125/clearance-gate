@@ -116,6 +116,16 @@ app.MapGet("/audit/{decisionId}",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
+app.MapGet("/audit/request/{requestId}",
+    async Task<IResult> (
+        string requestId,
+        ClearanceGate.Application.Abstractions.IAuditQueryService service,
+        CancellationToken cancellationToken) =>
+    {
+        var response = await service.GetAuditByRequestIdAsync(requestId, cancellationToken);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    });
+
 app.MapGet("/audit/{decisionId}/export",
     async Task<IResult> (
         string decisionId,
@@ -123,6 +133,16 @@ app.MapGet("/audit/{decisionId}/export",
         CancellationToken cancellationToken) =>
     {
         var response = await service.ExportAuditAsync(decisionId, cancellationToken);
+        return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
+    });
+
+app.MapGet("/audit/request/{requestId}/export",
+    async Task<IResult> (
+        string requestId,
+        ClearanceGate.Application.Abstractions.IAuditQueryService service,
+        CancellationToken cancellationToken) =>
+    {
+        var response = await service.ExportAuditByRequestIdAsync(requestId, cancellationToken);
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 

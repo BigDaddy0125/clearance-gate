@@ -46,7 +46,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 - The migration pipeline is defined in [SqliteAuditStoreInitializer.cs](/C:/work/clearance-gate/src/ClearanceGate.Audit/SqliteAuditStoreInitializer.cs).
 - Fresh and legacy databases are covered by [AuditStoreSchemaTests.cs](/C:/work/clearance-gate/tests/ClearanceGate.Api.Tests/AuditStoreSchemaTests.cs).
 - `GET /audit/{decisionId}` returns the compact replay view used by existing claim tests.
+- `GET /audit/request/{requestId}` returns the compact replay view keyed by the idempotent request identifier.
 - `GET /audit/{decisionId}/export` returns a fuller reconstructable envelope for external review or archival export.
+- `GET /audit/request/{requestId}/export` returns the fuller reconstructable envelope keyed by request id for idempotent external reconciliation.
 
 ## Deployment Notes
 
