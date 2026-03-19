@@ -1,169 +1,43 @@
-# ClearanceGate Claim Traceability
+# ClearanceGate Claim Traceability Checklist
 
-This document maps each claim to:
+This document is the review checklist for claim completeness.
 
-- the formal specification and TLC models
-- the runtime enforcement anchor
-- the executable integration test anchor
-- the CI execution path
+A claim is considered phase-complete only when it has:
 
-The goal is to keep claims auditable and reduce drift between docs, models, and implementation.
+- a written statement in `docs/security-claims.md`
+- a formal green and red path
+- a runtime enforcement anchor
+- an executable test anchor
+- a CI execution path
 
-## CG1: Outcome exclusivity
+Status values:
 
-Formal:
+- `COMPLETE`: all expected anchors exist and are wired
+- `PARTIAL`: claim exists, but one or more anchors are missing
 
-- `tla/specs/ClearanceKernel.tla`
-- `tla/models/kernel_ok.cfg`
-- `tla/models/kernel_negative_fail_open.cfg`
+## Checklist
 
-Runtime anchors:
+| Claim | Status | Formal | Runtime | Tests | CI |
+| --- | --- | --- | --- | --- | --- |
+| CG1 | COMPLETE | `ClearanceKernel.tla`, `kernel_ok.cfg`, `kernel_negative_fail_open.cfg` | `src/ClearanceGate.Kernel/ClearanceKernel.cs` | `KernelClaimsTests.EveryKnownState_MapsToExactlyOneDefinedOutcome` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
+| CG2 | COMPLETE | `ClearanceKernel.tla`, `ClearanceKernel_BadFailOpen.tla`, `kernel_ok.cfg`, `kernel_negative_fail_open.cfg` | `src/ClearanceGate.Kernel/ClearanceKernel.cs` | `KernelClaimsTests.DegradedAndInsufficientStates_NeverProceed`, `AuthorizationClaimsTests.BlockedDecision_CannotBeReleasedByAcknowledgment` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
+| CG3 | COMPLETE | `AcknowledgmentBounded.tla`, `AcknowledgmentBounded_BadUniversalAck.tla`, `ack_bounded_ok.cfg`, `ack_bounded_negative_universal_ack.cfg` | `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`, `src/ClearanceGate.Application/Services/AcknowledgmentService.cs` | `AuthorizationClaimsTests.RiskFlaggedDecision_RequiresAck_ThenAuditShowsAuthorizedAfterAck`, `AuthorizationClaimsTests.BlockedDecision_CannotBeReleasedByAcknowledgment` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
+| CG4 | COMPLETE | `DurableEvidenceGate.tla`, `DurableEvidenceGate_BadEarlyEmit.tla`, `durable_evidence_ok.cfg`, `durable_evidence_negative_early_emit.cfg` | `src/ClearanceGate.Application/Services/AuthorizationService.cs`, `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`, `src/ClearanceGate.Application/Services/AuditQueryService.cs` | `AuthorizationClaimsTests.NonBlockingOutcome_ImmediatelyExposesDurableEvidenceInAudit`, `AuthorizationClaimsTests.AuditEvidence_RemainsReadableAfterApplicationRestart` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
+| CG5 | COMPLETE | `RequestIdempotency.tla`, `RequestIdempotency_BadOverwrite.tla`, `idempotency_ok.cfg`, `idempotency_negative_overwrite.cfg` | `src/ClearanceGate.Application/Services/AuthorizationService.cs`, `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs` | `AuthorizationClaimsTests.SameRequestId_RemainsIdempotentAcrossConcurrentRequests` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
+| CG6 | COMPLETE | `ProfileConformance.tla`, `ProfileConformance_BadImplicitAllow.tla`, `ProfileRoleConformance.tla`, `ProfileRoleConformance_BadRoleBypass.tla`, generated configs, negative cfg models | `src/ClearanceGate.Profiles/EmbeddedProfileCatalog.cs`, `src/ClearanceGate.Policy/ProfilePolicyProjector.cs`, `src/ClearanceGate.Policy/ItOpsDeploymentPolicyEvaluator.cs`, `src/ClearanceGate.Application/Services/AuthorizationService.cs`, `src/ClearanceGate.Application/Services/AcknowledgmentService.cs` | `AuthorizationClaimsTests.UnknownProfile_IsRejectedFailClosed`, `AuthorizationClaimsTests.AuthorizationRole_MustMatchProfileRequirement`, `AuthorizationClaimsTests.AcknowledgmentRole_MustMatchProfileRequirement`, `AuthorizationClaimsTests.MissingSourceSystem_MapsToProfileRequiredFieldConstraint` | `scripts/run-tlc.ps1`, `.github/workflows/verification.yml` |
 
-- `src/ClearanceGate.Kernel/ClearanceKernel.cs`
+## Review Notes
 
-Executable anchors:
+- `CG1` and `CG2` now have direct kernel runtime tests, not just formal coverage.
+- `CG4` now has an immediate audit reconstruction test, not just restart-based durability coverage.
+- `CG6` includes both profile outcome/evidence conformance and role boundary conformance.
 
-- `tests/ClearanceGate.Api.Tests/KernelClaimsTests.cs`
-  `EveryKnownState_MapsToExactlyOneDefinedOutcome`
+## Maintenance Rule
 
-CI path:
+When a new claim is added or an existing claim is changed:
 
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
-
-## CG2: Fail-closed under uncertainty
-
-Formal:
-
-- `tla/specs/ClearanceKernel.tla`
-- `tla/specs/ClearanceKernel_BadFailOpen.tla`
-- `tla/models/kernel_ok.cfg`
-- `tla/models/kernel_negative_fail_open.cfg`
-
-Runtime anchors:
-
-- `src/ClearanceGate.Kernel/ClearanceKernel.cs`
-
-Executable anchors:
-
-- `tests/ClearanceGate.Api.Tests/KernelClaimsTests.cs`
-  `DegradedAndInsufficientStates_NeverProceed`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `BlockedDecision_CannotBeReleasedByAcknowledgment`
-
-CI path:
-
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
-
-## CG3: Acknowledgment is bounded
-
-Formal:
-
-- `tla/specs/AcknowledgmentBounded.tla`
-- `tla/specs/AcknowledgmentBounded_BadUniversalAck.tla`
-- `tla/models/ack_bounded_ok.cfg`
-- `tla/models/ack_bounded_negative_universal_ack.cfg`
-
-Runtime anchors:
-
-- `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
-- `src/ClearanceGate.Application/Services/AcknowledgmentService.cs`
-
-Executable anchors:
-
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `RiskFlaggedDecision_RequiresAck_ThenAuditShowsAuthorizedAfterAck`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `BlockedDecision_CannotBeReleasedByAcknowledgment`
-
-CI path:
-
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
-
-## CG4: Non-blocking outcomes require evidence
-
-Formal:
-
-- `tla/specs/DurableEvidenceGate.tla`
-- `tla/specs/DurableEvidenceGate_BadEarlyEmit.tla`
-- `tla/models/durable_evidence_ok.cfg`
-- `tla/models/durable_evidence_negative_early_emit.cfg`
-
-Runtime anchors:
-
-- `src/ClearanceGate.Application/Services/AuthorizationService.cs`
-- `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
-
-Executable anchors:
-
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `NonBlockingOutcome_ImmediatelyExposesDurableEvidenceInAudit`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `AuditEvidence_RemainsReadableAfterApplicationRestart`
-
-CI path:
-
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
-
-## CG5: Request replay is idempotent
-
-Formal:
-
-- `tla/specs/RequestIdempotency.tla`
-- `tla/specs/RequestIdempotency_BadOverwrite.tla`
-- `tla/models/idempotency_ok.cfg`
-- `tla/models/idempotency_negative_overwrite.cfg`
-
-Runtime anchors:
-
-- `src/ClearanceGate.Application/Services/AuthorizationService.cs`
-- `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
-
-Executable anchors:
-
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `SameRequestId_RemainsIdempotentAcrossConcurrentRequests`
-
-CI path:
-
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
-
-## CG6: Profiles cannot weaken kernel invariants
-
-Formal:
-
-- `tla/specs/ProfileConformance.tla`
-- `tla/specs/ProfileConformance_BadImplicitAllow.tla`
-- `tla/specs/ProfileRoleConformance.tla`
-- `tla/specs/ProfileRoleConformance_BadRoleBypass.tla`
-- generated configs via `scripts/generate-profile-tla-config.ps1`
-- `tla/models/profile_conformance_negative_implicit_allow.cfg`
-- `tla/models/profile_role_conformance_negative_role_bypass.cfg`
-
-Runtime anchors:
-
-- `src/ClearanceGate.Profiles/EmbeddedProfileCatalog.cs`
-- `src/ClearanceGate.Policy/ProfilePolicyProjector.cs`
-- `src/ClearanceGate.Policy/ItOpsDeploymentPolicyEvaluator.cs`
-- `src/ClearanceGate.Application/Services/AuthorizationService.cs`
-- `src/ClearanceGate.Application/Services/AcknowledgmentService.cs`
-
-Executable anchors:
-
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `UnknownProfile_IsRejectedFailClosed`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `AuthorizationRole_MustMatchProfileRequirement`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `AcknowledgmentRole_MustMatchProfileRequirement`
-- `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
-  `MissingSourceSystem_MapsToProfileRequiredFieldConstraint`
-
-CI path:
-
-- `scripts/run-tlc.ps1`
-- `.github/workflows/verification.yml`
+1. Update `docs/security-claims.md`.
+2. Update this checklist.
+3. Add or update formal green/red coverage.
+4. Add or update runtime claim tests.
+5. Ensure CI still executes the relevant formal and runtime paths.

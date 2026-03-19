@@ -33,6 +33,10 @@ jobs:
       - name: Restore
         run: dotnet restore .\ClearanceGate.slnx
 
+      - name: Check claim traceability
+        shell: pwsh
+        run: .\scripts\check-claim-traceability.ps1
+
       - name: Runtime claim tests
         run: >
           dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj

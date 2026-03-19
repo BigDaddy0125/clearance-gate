@@ -23,6 +23,7 @@ Repository layout:
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
+- `scripts/check-claim-traceability.ps1` checklist completeness guard
 
 Important constraints:
 
