@@ -186,6 +186,11 @@ public sealed class AuthorizationClaimsTests
         Assert.Contains("RISK_ACK_REQUIRED", exportPayload.ConstraintsApplied);
         Assert.Single(exportPayload.AuthorizationTimeline);
         Assert.Equal("AWAITING_ACK", exportPayload.AuthorizationTimeline[0].State);
+        Assert.Equal("0.1.0", exportPayload.Version.Kernel);
+        Assert.Equal("itops_deployment_v1", exportPayload.Version.Policy);
+        Assert.Equal(
+            exportPayload.ConstraintsApplied.OrderBy(item => item, StringComparer.Ordinal).ToArray(),
+            exportPayload.ConstraintsApplied.ToArray());
     }
 
     [Fact]
@@ -241,6 +246,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("AUTHORIZED", exportPayload.ClearanceState);
         Assert.Equal("alice", exportPayload.Responsibility.Acknowledger);
         Assert.Equal(new[] { "AWAITING_ACK", "AUTHORIZED" }, exportPayload.AuthorizationTimeline.Select(item => item.State));
+        Assert.Contains("acknowledged", exportPayload.Summary, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -277,6 +283,30 @@ public sealed class AuthorizationClaimsTests
         var response = await client.GetAsync("/audit/request/req-missing/export");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AuditRecordAndExport_AgreeForSameDecision()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-export-4", "dec-claim-export-4", Array.Empty<string>(), "alice", "change-control");
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-export-4");
+        var exportPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditExportResponse>("/audit/dec-claim-export-4/export");
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.NotNull(auditPayload);
+        Assert.NotNull(exportPayload);
+        Assert.Equal(auditPayload.DecisionId, exportPayload.DecisionId);
+        Assert.Equal(auditPayload.EvidenceId, exportPayload.EvidenceId);
+        Assert.Equal(auditPayload.Outcome, exportPayload.Outcome);
+        Assert.Equal(auditPayload.ConstraintsApplied, exportPayload.ConstraintsApplied);
+        Assert.Equal(
+            auditPayload.AuthorizationTimeline.Select(item => item.State),
+            exportPayload.AuthorizationTimeline.Select(item => item.State));
     }
 
     // CG6: unknown profile is rejected fail-closed

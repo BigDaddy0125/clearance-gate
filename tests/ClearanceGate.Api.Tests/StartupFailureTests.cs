@@ -14,13 +14,49 @@ public sealed class StartupFailureTests
             harness.DatabasePath,
             services =>
             {
-                services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog>(_ => new ThrowingProfileCatalog());
+                services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog>(_ => new ThrowingProfileCatalog("synthetic profile load failure"));
             });
 
         var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
 
         Assert.Contains("ClearanceGate startup validation failed", exception.ToString(), StringComparison.Ordinal);
         Assert.Contains("synthetic profile load failure", exception.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ApplicationStartup_RejectsInvalidProfileIdentity()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(
+            harness.DatabasePath,
+            services =>
+            {
+                services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog>(_ =>
+                    new ThrowingProfileCatalog("Profile 'bad-profile-name' must use canonical name '<family>_v<positive integer>'."));
+            });
+
+        var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+
+        Assert.Contains("ClearanceGate startup validation failed", exception.ToString(), StringComparison.Ordinal);
+        Assert.Contains("must use canonical name", exception.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ApplicationStartup_RejectsDuplicateProfileFamilyVersion()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(
+            harness.DatabasePath,
+            services =>
+            {
+                services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog>(_ =>
+                    new ThrowingProfileCatalog("Profile family 'itops_deployment' defines version '1' more than once."));
+            });
+
+        var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+
+        Assert.Contains("ClearanceGate startup validation failed", exception.ToString(), StringComparison.Ordinal);
+        Assert.Contains("defines version '1' more than once", exception.ToString(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -52,13 +88,16 @@ public sealed class StartupFailureTests
 
     private sealed class ThrowingProfileCatalog : ClearanceGate.Profiles.IProfileCatalog
     {
-        public ThrowingProfileCatalog()
+        private readonly string message;
+
+        public ThrowingProfileCatalog(string message)
         {
-            throw new InvalidOperationException("synthetic profile load failure");
+            this.message = message;
+            throw new InvalidOperationException(message);
         }
 
         public ClearanceGate.Profiles.ClearanceProfile GetRequiredProfile(string profileName) =>
-            throw new InvalidOperationException("synthetic profile load failure");
+            throw new InvalidOperationException(message);
     }
 
     private sealed class TemporaryDatabaseHarness : IDisposable
