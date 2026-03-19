@@ -63,6 +63,7 @@ This is the main lesson from `clawdbot-formal-models`: negative models are not o
 For ClearanceGate, each mature claim should ideally have:
 
 - one claim entry in `docs/security-claims.md`
+- one traceability entry in `docs/claim-traceability.md`
 - one runtime test or harness in `tests/`
 - one green TLA+ model
 - one red TLA+ model

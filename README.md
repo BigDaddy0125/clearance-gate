@@ -22,6 +22,7 @@ Repository layout:
 - `docs/` product, architecture, and formal verification strategy
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
+- `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
 
 Important constraints:
 

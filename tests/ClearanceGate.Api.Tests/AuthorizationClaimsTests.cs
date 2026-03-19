@@ -7,6 +7,7 @@ namespace ClearanceGate.Api.Tests;
 
 public sealed class AuthorizationClaimsTests
 {
+    // CG3: bounded acknowledgment
     [Fact]
     public async Task RiskFlaggedDecision_RequiresAck_ThenAuditShowsAuthorizedAfterAck()
     {
@@ -36,6 +37,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal(new[] { "AWAITING_ACK", "AUTHORIZED" }, auditPayload.AuthorizationTimeline.Select(item => item.State));
     }
 
+    // CG2 and CG3: fail-closed state plus bounded acknowledgment
     [Fact]
     public async Task BlockedDecision_CannotBeReleasedByAcknowledgment()
     {
@@ -63,6 +65,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("INFO_INSUFFICIENT", auditPayload.AuthorizationTimeline[0].State);
     }
 
+    // CG6: profile required-field constraint projects to runtime enforcement
     [Fact]
     public async Task MissingSourceSystem_MapsToProfileRequiredFieldConstraint()
     {
@@ -80,6 +83,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Contains("SOURCE_REQUIRED", authorizePayload.Reason.ConstraintsTriggered);
     }
 
+    // CG5: same request id replays to the first durable decision
     [Fact]
     public async Task SameRequestId_RemainsIdempotentAcrossConcurrentRequests()
     {
@@ -109,6 +113,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Single(auditPayload.AuthorizationTimeline);
     }
 
+    // CG4: durable evidence remains reconstructable after restart
     [Fact]
     public async Task AuditEvidence_RemainsReadableAfterApplicationRestart()
     {
@@ -135,6 +140,7 @@ public sealed class AuthorizationClaimsTests
         }
     }
 
+    // CG6: unknown profile is rejected fail-closed
     [Fact]
     public async Task UnknownProfile_IsRejectedFailClosed()
     {
@@ -157,6 +163,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal(HttpStatusCode.NotFound, auditResponse.StatusCode);
     }
 
+    // CG6: authorization role must conform to the profile/kernel boundary
     [Fact]
     public async Task AuthorizationRole_MustMatchProfileRequirement()
     {
@@ -176,6 +183,7 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("Authorization rejected", problem.Title);
     }
 
+    // CG6: acknowledgment role must conform to the profile/kernel boundary
     [Fact]
     public async Task AcknowledgmentRole_MustMatchProfileRequirement()
     {
