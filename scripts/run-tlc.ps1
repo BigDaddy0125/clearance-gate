@@ -52,6 +52,12 @@ $models = @(
         Spec = ".\\tla\\specs\\DurableEvidenceGate.tla"
         Config = ".\\tla\\models\\durable_evidence_ok.cfg"
         ExpectSuccess = $true
+    },
+    @{
+        Name = "profile_conformance_ok"
+        Spec = ".\\tla\\specs\\ProfileConformance.tla"
+        Config = ".\\tla\\models\\profile_conformance_ok.cfg"
+        ExpectSuccess = $true
     }
 )
 
@@ -84,6 +90,13 @@ if ($IncludeRed) {
             Config = ".\\tla\\models\\durable_evidence_negative_early_emit.cfg"
             ExpectSuccess = $false
             ExpectedViolation = "Inv_NonBlockingOutcomesRequireDurableEvidence"
+        },
+        @{
+            Name = "profile_conformance_negative_implicit_allow"
+            Spec = ".\\tla\\specs\\ProfileConformance_BadImplicitAllow.tla"
+            Config = ".\\tla\\models\\profile_conformance_negative_implicit_allow.cfg"
+            ExpectSuccess = $false
+            ExpectedViolation = "Inv_ProfileUsesOnlyKernelOutcomes"
         }
     )
 }
@@ -99,7 +112,7 @@ foreach ($model in $models) {
     $stderrPath = Join-Path $resolvedOutputRoot ($model.Name + ".stderr.tmp")
 
     if (Test-Path $metaDir) {
-        Remove-Item -Recurse -Force $metaDir
+        Remove-Item -Recurse -Force $metaDir -ErrorAction SilentlyContinue
     }
     if (Test-Path $stdoutPath) {
         Remove-Item -Force $stdoutPath

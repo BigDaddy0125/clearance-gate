@@ -240,6 +240,7 @@ Current implementation status:
 - CG1 and CG2 have green/red TLA coverage
 - CG3 and CG5 have green/red TLA coverage plus runtime claim tests
 - CG4 has green/red TLA coverage plus runtime durable-store coverage
+- CG6 has green/red TLA coverage for profile conformance against kernel outcomes and evidence rules
 
 ### Phase D: Profile conformance
 

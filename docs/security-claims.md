@@ -104,3 +104,25 @@ Executable coverage:
 
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
 - runtime enforcement in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
+
+### CG6: Profiles cannot weaken kernel invariants
+
+Statement:
+
+- a profile may define schema, constraints, and responsibility roles
+- a profile may not add new outcomes or bypass audit and fail-closed rules
+
+Spec:
+
+- `tla/specs/ProfileConformance.tla`
+- `tla/specs/ProfileConformance_BadImplicitAllow.tla`
+
+Models:
+
+- `tla/models/profile_conformance_ok.cfg`
+- `tla/models/profile_conformance_negative_implicit_allow.cfg`
+
+Runtime anchors:
+
+- `src/ClearanceGate.Profiles/itops_deployment_v1.json`
+- `src/ClearanceGate.Policy/ItOpsDeploymentPolicyEvaluator.cs`

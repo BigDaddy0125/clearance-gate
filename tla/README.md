@@ -16,7 +16,4 @@ Initial model set:
 - acknowledgment boundedness
 - durable evidence before non-blocking outcome
 - request idempotency
-
-Planned model set:
-
-- profile conformance
+- profile conformance to kernel invariants
