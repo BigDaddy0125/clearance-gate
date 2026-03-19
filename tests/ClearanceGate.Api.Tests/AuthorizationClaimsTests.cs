@@ -64,6 +64,23 @@ public sealed class AuthorizationClaimsTests
     }
 
     [Fact]
+    public async Task MissingSourceSystem_MapsToProfileRequiredFieldConstraint()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-2b", "dec-claim-2b", Array.Empty<string>(), "alice", string.Empty);
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var authorizePayload = await authorizeResponse.Content.ReadFromJsonAsync<ClearanceGate.Contracts.AuthorizationResponse>();
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.NotNull(authorizePayload);
+        Assert.Equal("BLOCK", authorizePayload.Outcome);
+        Assert.Contains("SOURCE_REQUIRED", authorizePayload.Reason.ConstraintsTriggered);
+    }
+
+    [Fact]
     public async Task SameRequestId_RemainsIdempotentAcrossConcurrentRequests()
     {
         using var harness = CreateHarness();

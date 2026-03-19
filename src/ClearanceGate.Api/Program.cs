@@ -23,6 +23,7 @@ builder.Services.Configure<ClearanceGate.Audit.AuditStoreOptions>(options =>
     options.ConnectionString = auditStoreConnectionString;
 });
 builder.Services.AddSingleton<ClearanceGate.Profiles.IProfileCatalog, ClearanceGate.Profiles.EmbeddedProfileCatalog>();
+builder.Services.AddSingleton<ClearanceGate.Policy.IProfilePolicyProjector, ClearanceGate.Policy.ProfilePolicyProjector>();
 builder.Services.AddSingleton<ClearanceGate.Audit.IAuditStoreInitializer, ClearanceGate.Audit.SqliteAuditStoreInitializer>();
 builder.Services.AddSingleton<ClearanceGate.Audit.IDecisionAuditStore, ClearanceGate.Audit.SqliteDecisionAuditStore>();
 builder.Services.AddSingleton<ClearanceGate.Policy.IPolicyEvaluator, ClearanceGate.Policy.ItOpsDeploymentPolicyEvaluator>();
