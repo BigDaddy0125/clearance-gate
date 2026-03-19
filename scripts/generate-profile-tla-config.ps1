@@ -59,21 +59,35 @@ function Get-StringConstantsFromSourceFile {
     )
 }
 
+function Get-NamedStringConstantFromSourceFile {
+    param(
+        [string]$Path,
+        [string]$ConstantName
+    )
+
+    $match = Select-String -Path $Path -Pattern ('const string ' + [regex]::Escape($ConstantName) + ' = "([^"]+)"') |
+        Select-Object -First 1
+
+    if ($null -eq $match) {
+        throw "Constant '$ConstantName' was not found in '$Path'."
+    }
+
+    return $match.Matches[0].Groups[1].Value
+}
+
 $profile = Get-Content $resolvedProfilePath | ConvertFrom-Json
-$kernelSourcePath = Join-Path $repoRoot "src\\ClearanceGate.Kernel\\WireNames.cs"
+$kernelOutcomeNamesPath = Join-Path $repoRoot "src\\ClearanceGate.Kernel\\KernelOutcomeNames.cs"
 $rolesSourcePath = Join-Path $repoRoot "src\\ClearanceGate.Profiles\\KernelResponsibilityRoles.cs"
+$constraintKindsSourcePath = Join-Path $repoRoot "src\\ClearanceGate.Profiles\\ProfileConstraintKinds.cs"
 
 $profileRoles = @($profile.responsibilityRoles)
 $constraintKinds = @($profile.constraints | ForEach-Object { $_.kind })
 $requiredRoles = Get-StringConstantsFromSourceFile -Path $rolesSourcePath -Pattern 'const string [A-Za-z]+ = "([^"]+)"'
-$kernelOutcomes = Get-StringConstantsFromSourceFile -Path $kernelSourcePath -Pattern 'AuthorizationOutcome\.[A-Za-z]+ => "([^"]+)"'
-$allowedConstraintKinds = @(
-    "ack_required",
-    "required_field"
-)
+$kernelOutcomes = Get-StringConstantsFromSourceFile -Path $kernelOutcomeNamesPath -Pattern 'const string [A-Za-z]+ = "([^"]+)"'
+$allowedConstraintKinds = Get-StringConstantsFromSourceFile -Path $constraintKindsSourcePath -Pattern 'const string [A-Za-z]+ = "([^"]+)"'
 
-$requiredAuthorizationRole = "decision_owner"
-$requiredAcknowledgmentRole = "acknowledging_authority"
+$requiredAuthorizationRole = Get-NamedStringConstantFromSourceFile -Path $rolesSourcePath -ConstantName "DecisionOwner"
+$requiredAcknowledgmentRole = Get-NamedStringConstantFromSourceFile -Path $rolesSourcePath -ConstantName "AcknowledgingAuthority"
 
 $outputDirectory = Split-Path $resolvedOutputPath -Parent
 [System.IO.Directory]::CreateDirectory($outputDirectory) | Out-Null

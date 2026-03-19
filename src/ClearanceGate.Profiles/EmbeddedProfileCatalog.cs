@@ -17,18 +17,6 @@ public sealed class EmbeddedProfileCatalog : IProfileCatalog
         KernelResponsibilityRoles.AuditReviewer,
     };
 
-    private static readonly string[] AllowedConstraintKinds =
-    {
-        "ack_required",
-        "required_field",
-    };
-
-    private static readonly string[] AllowedRequiredFields =
-    {
-        "responsibility.owner",
-        "metadata.source_system",
-    };
-
     private readonly Dictionary<string, ClearanceProfile> profiles;
 
     public EmbeddedProfileCatalog()
@@ -113,19 +101,19 @@ public sealed class EmbeddedProfileCatalog : IProfileCatalog
                 throw new InvalidOperationException($"Profile '{profile.Profile}' defines duplicate constraint id '{constraint.Id}'.");
             }
 
-            if (!AllowedConstraintKinds.Contains(constraint.Kind, StringComparer.Ordinal))
+            if (!IsAllowedConstraintKind(constraint.Kind))
             {
                 throw new InvalidOperationException($"Profile '{profile.Profile}' uses unsupported constraint kind '{constraint.Kind}'.");
             }
 
-            if (string.Equals(constraint.Kind, "required_field", StringComparison.Ordinal) &&
-                !AllowedRequiredFields.Contains(constraint.Field, StringComparer.Ordinal))
+            if (string.Equals(constraint.Kind, ProfileConstraintKinds.RequiredField, StringComparison.Ordinal) &&
+                !IsAllowedRequiredField(constraint.Field))
             {
                 throw new InvalidOperationException(
                     $"Profile '{profile.Profile}' uses unsupported required field '{constraint.Field}'.");
             }
 
-            if (string.Equals(constraint.Kind, "ack_required", StringComparison.Ordinal) &&
+            if (string.Equals(constraint.Kind, ProfileConstraintKinds.AckRequired, StringComparison.Ordinal) &&
                 string.IsNullOrWhiteSpace(constraint.WhenRiskFlagPresent))
             {
                 throw new InvalidOperationException(
@@ -133,4 +121,12 @@ public sealed class EmbeddedProfileCatalog : IProfileCatalog
             }
         }
     }
+
+    private static bool IsAllowedConstraintKind(string? kind) =>
+        string.Equals(kind, ProfileConstraintKinds.AckRequired, StringComparison.Ordinal) ||
+        string.Equals(kind, ProfileConstraintKinds.RequiredField, StringComparison.Ordinal);
+
+    private static bool IsAllowedRequiredField(string? field) =>
+        string.Equals(field, ProfileFieldPaths.ResponsibilityOwner, StringComparison.Ordinal) ||
+        string.Equals(field, ProfileFieldPaths.MetadataSourceSystem, StringComparison.Ordinal);
 }

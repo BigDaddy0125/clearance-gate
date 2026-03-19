@@ -12,13 +12,19 @@ public sealed class ItOpsDeploymentPolicyEvaluator(
 
         foreach (var constraint in projectedProfile.RequiredFieldConstraints)
         {
-            if (string.Equals(constraint.Field, "responsibility.owner", StringComparison.Ordinal) &&
+            if (string.Equals(
+                    constraint.Field,
+                    ClearanceGate.Profiles.ProfileFieldPaths.ResponsibilityOwner,
+                    StringComparison.Ordinal) &&
                 string.IsNullOrWhiteSpace(request.Responsibility.Owner))
             {
                 constraints.Add(constraint.ConstraintId);
             }
 
-            if (string.Equals(constraint.Field, "metadata.source_system", StringComparison.Ordinal) &&
+            if (string.Equals(
+                    constraint.Field,
+                    ClearanceGate.Profiles.ProfileFieldPaths.MetadataSourceSystem,
+                    StringComparison.Ordinal) &&
                 string.IsNullOrWhiteSpace(request.Metadata.SourceSystem))
             {
                 constraints.Add(constraint.ConstraintId);

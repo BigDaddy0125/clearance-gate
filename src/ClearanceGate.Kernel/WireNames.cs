@@ -18,10 +18,10 @@ public static class WireNames
     public static string ToWireName(this AuthorizationOutcome outcome) =>
         outcome switch
         {
-            AuthorizationOutcome.Proceed => "PROCEED",
-            AuthorizationOutcome.Block => "BLOCK",
-            AuthorizationOutcome.RequireAck => "REQUIRE_ACK",
-            AuthorizationOutcome.Degrade => "DEGRADE",
+            AuthorizationOutcome.Proceed => KernelOutcomeNames.Proceed,
+            AuthorizationOutcome.Block => KernelOutcomeNames.Block,
+            AuthorizationOutcome.RequireAck => KernelOutcomeNames.RequireAck,
+            AuthorizationOutcome.Degrade => KernelOutcomeNames.Degrade,
             _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, "Unknown authorization outcome."),
         };
 }
