@@ -45,6 +45,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 - The current schema version is defined in [AuditStoreSchema.cs](/C:/work/clearance-gate/src/ClearanceGate.Audit/AuditStoreSchema.cs).
 - The migration pipeline is defined in [SqliteAuditStoreInitializer.cs](/C:/work/clearance-gate/src/ClearanceGate.Audit/SqliteAuditStoreInitializer.cs).
 - Fresh and legacy databases are covered by [AuditStoreSchemaTests.cs](/C:/work/clearance-gate/tests/ClearanceGate.Api.Tests/AuditStoreSchemaTests.cs).
+- `GET /audit/{decisionId}` returns the compact replay view used by existing claim tests.
+- `GET /audit/{decisionId}/export` returns a fuller reconstructable envelope for external review or archival export.
 
 ## Deployment Notes
 

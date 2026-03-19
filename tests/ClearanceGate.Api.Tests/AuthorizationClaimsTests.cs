@@ -164,6 +164,30 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("AWAITING_ACK", auditPayload.AuthorizationTimeline[0].State);
     }
 
+    [Fact]
+    public async Task AuditExport_ReturnsReconstructableDecisionEnvelope()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest("req-claim-export-1", "dec-claim-export-1", new[] { "HIGH_IMPACT" }, "alice", "change-control");
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var exportPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditExportResponse>("/audit/dec-claim-export-1/export");
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.NotNull(exportPayload);
+        Assert.Equal("dec-claim-export-1", exportPayload.DecisionId);
+        Assert.Equal("req-claim-export-1", exportPayload.RequestId);
+        Assert.Equal("itops_deployment_v1", exportPayload.Profile);
+        Assert.Equal("evidence:dec-claim-export-1", exportPayload.EvidenceId);
+        Assert.Equal("REQUIRE_ACK", exportPayload.Outcome);
+        Assert.Equal("AWAITING_ACK", exportPayload.ClearanceState);
+        Assert.Contains("RISK_ACK_REQUIRED", exportPayload.ConstraintsApplied);
+        Assert.Single(exportPayload.AuthorizationTimeline);
+        Assert.Equal("AWAITING_ACK", exportPayload.AuthorizationTimeline[0].State);
+    }
+
     // CG6: unknown profile is rejected fail-closed
     [Fact]
     public async Task UnknownProfile_IsRejectedFailClosed()

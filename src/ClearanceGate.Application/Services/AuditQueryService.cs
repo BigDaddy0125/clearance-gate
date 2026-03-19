@@ -16,9 +16,7 @@ public sealed class AuditQueryService(
         var response = new ClearanceGate.Contracts.AuditRecordResponse(
             record.DecisionId,
             record.EvidenceId,
-            record.Timeline
-                .Select(item => new ClearanceGate.Contracts.AuditTimelineItem(item.State, item.Timestamp))
-                .ToArray(),
+            MapTimeline(record),
             record.Outcome,
             new ClearanceGate.Contracts.AuditResponsibility(record.Owner, record.AcknowledgerId ?? string.Empty),
             record.ConstraintsApplied.ToArray(),
@@ -26,4 +24,35 @@ public sealed class AuditQueryService(
 
         return Task.FromResult<ClearanceGate.Contracts.AuditRecordResponse?>(response);
     }
+
+    public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditAsync(
+        string decisionId,
+        CancellationToken cancellationToken)
+    {
+        var record = auditStore.GetByDecisionId(decisionId);
+        if (record is null)
+        {
+            return Task.FromResult<ClearanceGate.Contracts.AuditExportResponse?>(null);
+        }
+
+        var response = new ClearanceGate.Contracts.AuditExportResponse(
+            record.DecisionId,
+            record.RequestId,
+            record.Profile,
+            record.EvidenceId,
+            record.Outcome,
+            record.ClearanceState,
+            record.Summary,
+            new ClearanceGate.Contracts.AuditResponsibility(record.Owner, record.AcknowledgerId ?? string.Empty),
+            record.ConstraintsApplied.ToArray(),
+            MapTimeline(record),
+            new ClearanceGate.Contracts.VersionInfo(record.KernelVersion, record.PolicyVersion));
+
+        return Task.FromResult<ClearanceGate.Contracts.AuditExportResponse?>(response);
+    }
+
+    private static ClearanceGate.Contracts.AuditTimelineItem[] MapTimeline(ClearanceGate.Audit.DecisionAuditRecord record) =>
+        record.Timeline
+            .Select(item => new ClearanceGate.Contracts.AuditTimelineItem(item.State, item.Timestamp))
+            .ToArray();
 }
