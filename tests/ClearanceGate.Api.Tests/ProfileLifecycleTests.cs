@@ -152,6 +152,59 @@ public sealed class ProfileLifecycleTests
     }
 
     [Fact]
+    public void ProfileCatalogValidator_RejectsConstraintWithoutId()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                Constraints = new[]
+                {
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint(
+                        "",
+                        ClearanceGate.Profiles.ProfileConstraintKinds.RequiredField,
+                        ClearanceGate.Profiles.ProfileFieldPaths.MetadataSourceSystem,
+                        null),
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("constraint without an id", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProfileCatalogValidator_RejectsDuplicateConstraintIds()
+    {
+        var profiles = new[]
+        {
+            (CreateProfile("itops_deployment_v1") with
+            {
+                Constraints = new[]
+                {
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint(
+                        "DUPLICATE",
+                        ClearanceGate.Profiles.ProfileConstraintKinds.RequiredField,
+                        ClearanceGate.Profiles.ProfileFieldPaths.ResponsibilityOwner,
+                        null),
+                    new ClearanceGate.Profiles.ClearanceProfileConstraint(
+                        "DUPLICATE",
+                        ClearanceGate.Profiles.ProfileConstraintKinds.RequiredField,
+                        ClearanceGate.Profiles.ProfileFieldPaths.MetadataSourceSystem,
+                        null),
+                },
+            }, "profile-a.json"),
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ClearanceGate.Profiles.ProfileCatalogValidator.ValidateProfiles(profiles));
+
+        Assert.Contains("duplicate constraint id 'DUPLICATE'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ProfileCatalogValidator_AllowsDistinctVersionsWithinSameFamily()
     {
         var profiles = new[]
