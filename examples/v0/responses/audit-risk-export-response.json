@@ -1,0 +1,30 @@
+{
+  "decisionId": "dec-example-risk-1",
+  "requestId": "req-example-risk-1",
+  "profile": "itops_deployment_v1",
+  "evidenceId": "evidence:dec-example-risk-1",
+  "outcome": "PROCEED",
+  "clearanceState": "AUTHORIZED",
+  "summary": "Authorization acknowledged by designated authority.",
+  "responsibility": {
+    "owner": "alice",
+    "acknowledger": "alice"
+  },
+  "constraintsApplied": [
+    "RISK_ACK_REQUIRED"
+  ],
+  "authorizationTimeline": [
+    {
+      "state": "AWAITING_ACK",
+      "timestamp": "2026-03-18T10:00:00Z"
+    },
+    {
+      "state": "AUTHORIZED",
+      "timestamp": "2026-03-18T10:05:00Z"
+    }
+  ],
+  "version": {
+    "kernel": "0.1.0",
+    "policy": "itops_deployment_v1"
+  }
+}

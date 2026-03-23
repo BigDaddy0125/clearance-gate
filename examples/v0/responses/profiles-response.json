@@ -1,0 +1,11 @@
+{
+  "profiles": [
+    {
+      "profile": "itops_deployment_v1",
+      "family": "itops_deployment",
+      "version": 1,
+      "description": "Initial profile for deployment and change authorization.",
+      "isLatest": true
+    }
+  ]
+}

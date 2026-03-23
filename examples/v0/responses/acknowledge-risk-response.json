@@ -1,0 +1,6 @@
+{
+  "decisionId": "dec-example-risk-1",
+  "outcome": "PROCEED",
+  "clearanceState": "AUTHORIZED",
+  "evidenceId": "evidence:dec-example-risk-1"
+}

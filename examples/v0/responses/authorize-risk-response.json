@@ -1,0 +1,16 @@
+{
+  "decisionId": "dec-example-risk-1",
+  "outcome": "REQUIRE_ACK",
+  "clearanceState": "AWAITING_ACK",
+  "evidenceId": "evidence:dec-example-risk-1",
+  "reason": {
+    "summary": "Authorization requires explicit acknowledgment.",
+    "constraintsTriggered": [
+      "RISK_ACK_REQUIRED"
+    ]
+  },
+  "version": {
+    "kernel": "0.1.0",
+    "policy": "itops_deployment_v1"
+  }
+}
