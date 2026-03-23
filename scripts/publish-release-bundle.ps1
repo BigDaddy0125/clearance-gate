@@ -36,7 +36,8 @@ $publishArguments = @(
     "publish",
     $apiProject,
     "--configuration", $Configuration,
-    "--output", $appOutput
+    "--output", $appOutput,
+    "-p:UseSharedCompilation=false"
 )
 
 if (-not [string]::IsNullOrWhiteSpace($Runtime)) {
@@ -50,9 +51,17 @@ else {
     $publishArguments += @("--self-contained", "false")
 }
 
-& dotnet @publishArguments
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed with exit code $LASTEXITCODE."
+for ($attempt = 1; $attempt -le 5; $attempt++) {
+    & dotnet @publishArguments
+    if ($LASTEXITCODE -eq 0) {
+        break
+    }
+
+    if ($attempt -eq 5) {
+        throw "dotnet publish failed with exit code $LASTEXITCODE."
+    }
+
+    Start-Sleep -Milliseconds (500 * $attempt)
 }
 
 $documentsToCopy = @(

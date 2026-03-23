@@ -2,7 +2,7 @@
 
 This runbook turns the current `v0` boundary into concrete deployment steps.
 
-It is intentionally narrow and aligned to the current single-profile pilot shape.
+It is intentionally narrow and aligned to the current primary pilot profile shape.
 
 ## Deployment Goal
 
@@ -28,6 +28,8 @@ At minimum, set:
 
 - application working directory
 - `ConnectionStrings__AuditStore`
+
+This setting is required. Startup should fail if it is missing or blank.
 
 Reference example:
 

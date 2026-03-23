@@ -11,9 +11,12 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $authorizeRisk = Join-Path $repoRoot "examples\v0\authorize-risk.json"
 $ackRisk = Join-Path $repoRoot "examples\v0\acknowledge-risk.json"
-$expectedDecisionId = "dec-example-risk-1"
-$expectedRequestId = "req-example-risk-1"
-$expectedEvidenceId = "evidence:dec-example-risk-1"
+$runSuffix = [Guid]::NewGuid().ToString("N").Substring(0, 12)
+$expectedDecisionId = "dec-deployment-smoke-$runSuffix"
+$expectedRequestId = "req-deployment-smoke-$runSuffix"
+$expectedEvidenceId = "evidence:$expectedDecisionId"
+$authorizeTimestamp = [DateTime]::UtcNow.ToString("o")
+$ackTimestamp = [DateTime]::UtcNow.AddMinutes(1).ToString("o")
 
 function Assert-Equal {
     param(
@@ -42,15 +45,22 @@ Write-Host "Checking profile catalog..."
 $profiles = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles"
 $latestProfile = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles/latest/$ProfileFamily"
 
-Assert-Equal -Name "Latest profile id" -Actual $latestProfile.profileId -Expected $ExpectedProfileId
-Assert-True -Name "Catalog contains expected profile" -Condition ($profiles.profiles.profileId -contains $ExpectedProfileId)
+Assert-Equal -Name "Latest profile id" -Actual $latestProfile.profile.profile -Expected $ExpectedProfileId
+Assert-True -Name "Catalog contains expected profile" -Condition ($profiles.profiles.profile -contains $ExpectedProfileId)
 
 Write-Host "Authorizing bounded-risk request..."
+$authorizePayload = Get-Content -Raw -Path $authorizeRisk | ConvertFrom-Json
+$authorizePayload.requestId = $expectedRequestId
+$authorizePayload.decisionId = $expectedDecisionId
+$authorizePayload.profile = $ExpectedProfileId
+$authorizePayload.metadata.timestamp = $authorizeTimestamp
+$authorizeBody = $authorizePayload | ConvertTo-Json -Depth 10
+
 $authorizeResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/authorize" `
     -ContentType "application/json" `
-    -InFile $authorizeRisk
+    -Body $authorizeBody
 
 Assert-Equal -Name "Authorize decisionId" -Actual $authorizeResponse.decisionId -Expected $expectedDecisionId
 Assert-Equal -Name "Authorize outcome" -Actual $authorizeResponse.outcome -Expected "REQUIRE_ACK"
@@ -58,11 +68,16 @@ Assert-Equal -Name "Authorize clearanceState" -Actual $authorizeResponse.clearan
 Assert-Equal -Name "Authorize evidenceId" -Actual $authorizeResponse.evidenceId -Expected $expectedEvidenceId
 
 Write-Host "Submitting bounded acknowledgment..."
+$ackPayload = Get-Content -Raw -Path $ackRisk | ConvertFrom-Json
+$ackPayload.decisionId = $expectedDecisionId
+$ackPayload.acknowledgment.timestamp = $ackTimestamp
+$ackBody = $ackPayload | ConvertTo-Json -Depth 10
+
 $ackResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/acknowledge" `
     -ContentType "application/json" `
-    -InFile $ackRisk
+    -Body $ackBody
 
 Assert-Equal -Name "Ack decisionId" -Actual $ackResponse.decisionId -Expected $expectedDecisionId
 Assert-Equal -Name "Ack outcome" -Actual $ackResponse.outcome -Expected "PROCEED"

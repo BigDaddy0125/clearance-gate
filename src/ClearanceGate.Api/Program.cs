@@ -3,18 +3,21 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuredAuditStoreConnectionString = builder.Configuration.GetConnectionString("AuditStore")
-    ?? "Data Source=App_Data/clearancegate.db";
-var sqliteConnectionStringBuilder = new SqliteConnectionStringBuilder(configuredAuditStoreConnectionString);
-if (!string.IsNullOrWhiteSpace(sqliteConnectionStringBuilder.DataSource) &&
-    !Path.IsPathRooted(sqliteConnectionStringBuilder.DataSource))
+var configuredAuditStoreConnectionString = builder.Configuration.GetConnectionString("AuditStore");
+var auditStoreConnectionString = string.Empty;
+if (!string.IsNullOrWhiteSpace(configuredAuditStoreConnectionString))
 {
-    sqliteConnectionStringBuilder.DataSource = Path.Combine(
-        builder.Environment.ContentRootPath,
-        sqliteConnectionStringBuilder.DataSource);
-}
+    var sqliteConnectionStringBuilder = new SqliteConnectionStringBuilder(configuredAuditStoreConnectionString);
+    if (!string.IsNullOrWhiteSpace(sqliteConnectionStringBuilder.DataSource) &&
+        !Path.IsPathRooted(sqliteConnectionStringBuilder.DataSource))
+    {
+        sqliteConnectionStringBuilder.DataSource = Path.Combine(
+            builder.Environment.ContentRootPath,
+            sqliteConnectionStringBuilder.DataSource);
+    }
 
-var auditStoreConnectionString = sqliteConnectionStringBuilder.ToString();
+    auditStoreConnectionString = sqliteConnectionStringBuilder.ToString();
+}
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddProblemDetails();

@@ -4,9 +4,13 @@ This document is the pilot-facing example pack for ClearanceGate `v0`.
 
 It shows the current API surface as it exists now.
 
-These examples are intentionally narrow and map to the single embedded pilot profile:
+These examples are intentionally narrow and use the primary pilot profile:
 
 - `itops_deployment_v1`
+
+The embedded catalog now also contains:
+
+- `incident_mitigation_v1`
 
 ## Preconditions
 
@@ -220,6 +224,13 @@ Expected response shape:
       "version": 1,
       "description": "Initial profile for deployment and change authorization.",
       "isLatest": true
+    },
+    {
+      "profile": "incident_mitigation_v1",
+      "family": "incident_mitigation",
+      "version": 1,
+      "description": "Initial profile for mitigation and rollback authorization during active incidents.",
+      "isLatest": true
     }
   ]
 }
@@ -242,4 +253,4 @@ Important:
 
 - ClearanceGate does not execute the action described in the request.
 - ClearanceGate does not choose a profile automatically.
-- `v0` remains intentionally narrow: one pilot profile, one explicit request shape, one durable audit path.
+- the examples remain intentionally narrow around the primary pilot profile even though the embedded catalog now contains more than one family.
