@@ -114,7 +114,7 @@ Why this profile first:
 
 ### Phase 2
 
-- durable Postgres-backed audit store
+- durable SQLite-backed audit store
 - idempotent request handling
 - acknowledgment flow
 
@@ -123,3 +123,13 @@ Why this profile first:
 - one real pilot adapter
 - shadow mode
 - audit replay pack
+
+## Current Interpretation
+
+The repository has now progressed past the earliest blueprint stage.
+
+The current practical target is a `v0` pilot boundary, defined in:
+
+- [v0-scope.md](/C:/work/clearance-gate/docs/v0-scope.md)
+
+That target is narrower than the long-term product vision and should remain narrow on purpose.
