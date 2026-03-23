@@ -51,6 +51,9 @@ else {
 }
 
 & dotnet @publishArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet publish failed with exit code $LASTEXITCODE."
+}
 
 $documentsToCopy = @(
     "docs\deployment-runbook.md",

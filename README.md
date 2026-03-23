@@ -40,6 +40,7 @@ Repository layout:
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
+- `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 
 Important constraints:
 

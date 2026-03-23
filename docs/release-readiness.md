@@ -88,6 +88,7 @@ Primary anchor:
 Verify:
 
 - `powershell -ExecutionPolicy Bypass -File .\scripts\publish-release-bundle.ps1` succeeds
+- `powershell -ExecutionPolicy Bypass -File .\scripts\validate-release-bundle.ps1` succeeds
 - the release bundle includes `bundle-manifest.json`
 - the bundle includes deployment docs and `appsettings.Production.example.json`
 

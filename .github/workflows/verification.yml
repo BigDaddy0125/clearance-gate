@@ -49,6 +49,14 @@ jobs:
           --logger "trx;LogFileName=runtime-claims.trx"
           --results-directory .\artifacts\test-results
 
+      - name: Publish release bundle
+        shell: pwsh
+        run: .\scripts\publish-release-bundle.ps1
+
+      - name: Validate release bundle
+        shell: pwsh
+        run: .\scripts\validate-release-bundle.ps1
+
       - name: TLC green models
         shell: pwsh
         run: .\scripts\run-tlc.ps1
@@ -93,6 +101,12 @@ jobs:
         with:
           name: runtime-claim-results
           path: artifacts/test-results
+
+      - name: Upload release bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: artifacts/publish
 
       - name: Upload release readiness artifacts
         uses: actions/upload-artifact@v4
