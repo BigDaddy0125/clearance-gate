@@ -28,6 +28,7 @@ Repository layout:
 - `docs/deployment-runbook.md` concrete deployment and smoke-flow steps
 - `docs/pilot-acceptance-checklist.md` pilot entry, success, and stop criteria
 - `docs/pilot-sample-session.md` one complete step-by-step pilot session
+- `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
