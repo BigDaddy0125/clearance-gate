@@ -39,6 +39,7 @@ Repository layout:
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
+- `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 
 Important constraints:
 

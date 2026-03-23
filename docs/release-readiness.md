@@ -83,6 +83,14 @@ Primary anchor:
 
 - [verification.yml](/C:/work/clearance-gate/.github/workflows/verification.yml)
 
+## Bundle Gate
+
+Verify:
+
+- `powershell -ExecutionPolicy Bypass -File .\scripts\publish-release-bundle.ps1` succeeds
+- the release bundle includes `bundle-manifest.json`
+- the bundle includes deployment docs and `appsettings.Production.example.json`
+
 ## Minimal Approval Rule
 
 A release candidate is acceptable only when:

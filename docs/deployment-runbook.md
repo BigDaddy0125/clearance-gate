@@ -56,12 +56,27 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\run-tlc.ps1 -IncludeRed
 ```
 
-3. Start the API:
+3. Publish a repeatable bundle:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\publish-release-bundle.ps1
+```
+
+This produces:
+
+- `artifacts/publish/app`
+- `artifacts/publish/bundle-manifest.json`
+- copied deployment/runbook docs
+- deployment config example
+
+4. Start the API from the bundle:
 
 ```powershell
 $env:ConnectionStrings__AuditStore = "Data Source=C:\clearancegate-data\clearancegate.db"
-dotnet run --project .\src\ClearanceGate.Api\ClearanceGate.Api.csproj --configuration Release
+.\artifacts\publish\app\ClearanceGate.Api.exe
 ```
+
+If you publish for a non-Windows portable target, run the generated dll with `dotnet`.
 
 ## First-Start Checks
 
@@ -98,6 +113,7 @@ Reference:
 
 - [api-examples.md](/C:/work/clearance-gate/docs/api-examples.md)
 - [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1)
+- [publish-release-bundle.ps1](/C:/work/clearance-gate/scripts/publish-release-bundle.ps1)
 
 Example:
 
