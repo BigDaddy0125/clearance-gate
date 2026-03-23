@@ -25,6 +25,8 @@ Repository layout:
 - `docs/release-readiness.md` current release gate checklist
 - `docs/v0-scope.md` v0 pilot scope and completion definition
 - `docs/api-examples.md` pilot-facing request, response, and diagnostics examples
+- `docs/deployment-runbook.md` concrete deployment and smoke-flow steps
+- `docs/pilot-acceptance-checklist.md` pilot entry, success, and stop criteria
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
