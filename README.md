@@ -24,6 +24,7 @@ Repository layout:
 - `docs/profile-lifecycle.md` profile naming, versioning, and fail-closed lifecycle rules
 - `docs/release-readiness.md` current release gate checklist
 - `docs/v0-scope.md` v0 pilot scope and completion definition
+- `docs/api-examples.md` pilot-facing request, response, and diagnostics examples
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping

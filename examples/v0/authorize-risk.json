@@ -1,0 +1,25 @@
+{
+  "requestId": "req-example-risk-1",
+  "decisionId": "dec-example-risk-1",
+  "profile": "itops_deployment_v1",
+  "action": {
+    "type": "deploy",
+    "description": "Promote release 2026.03.18"
+  },
+  "context": {
+    "attributes": {
+      "changeWindow": "business-hours"
+    }
+  },
+  "riskFlags": [
+    "HIGH_IMPACT"
+  ],
+  "responsibility": {
+    "owner": "alice",
+    "role": "decision_owner"
+  },
+  "metadata": {
+    "sourceSystem": "change-control",
+    "timestamp": "2026-03-18T10:00:00Z"
+  }
+}
