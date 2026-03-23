@@ -30,6 +30,7 @@ Repository layout:
 - `docs/pilot-acceptance-checklist.md` pilot entry, success, and stop criteria
 - `docs/pilot-sample-session.md` one complete step-by-step pilot session
 - `docs/pilot-adapter-example.md` one narrow caller-side mapping example for the current pilot
+- `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
 - `docs/post-pilot-decision-memo.md` template for deciding what happens after the pilot
