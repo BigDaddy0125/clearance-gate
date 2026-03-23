@@ -62,6 +62,7 @@ Executable coverage:
 
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
 - runtime enforcement in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
+- `tests/ClearanceGate.Api.Tests/SqliteDecisionAuditStoreTests.cs`
 
 ### CG4: Non-blocking outcomes require evidence
 
@@ -83,6 +84,7 @@ Executable coverage:
 
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
 - durable persistence in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
+- audit export/read models in `src/ClearanceGate.Application/Services/AuditQueryService.cs`
 
 ### CG5: Request replay is idempotent
 
@@ -104,6 +106,7 @@ Executable coverage:
 
 - `tests/ClearanceGate.Api.Tests/AuthorizationClaimsTests.cs`
 - runtime enforcement in `src/ClearanceGate.Audit/SqliteDecisionAuditStore.cs`
+- `tests/ClearanceGate.Api.Tests/SqliteDecisionAuditStoreTests.cs`
 
 ### CG6: Profiles cannot weaken kernel invariants
 
@@ -129,4 +132,6 @@ Models:
 Runtime anchors:
 
 - `src/ClearanceGate.Profiles/itops_deployment_v1.json`
+- `src/ClearanceGate.Profiles/ProfileVersionIdentity.cs`
+- `src/ClearanceGate.Profiles/ProfileCatalogValidator.cs`
 - `src/ClearanceGate.Policy/ItOpsDeploymentPolicyEvaluator.cs`
