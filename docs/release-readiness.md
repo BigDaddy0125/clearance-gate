@@ -1,0 +1,93 @@
+# Release Readiness
+
+This checklist defines the current minimum release gate for ClearanceGate.
+
+It does not certify business readiness.
+
+It certifies that the current authorization boundary, formal suite, and startup safeguards are intact.
+
+## Required Gates
+
+Release is blocked unless all of the following are green:
+
+- startup validation remains fail-closed
+- claim traceability resolves
+- runtime claim tests pass
+- TLC green models pass
+- TLC red models fail as expected
+- profile diagnostics remain read-only and do not change request semantics
+
+## Startup Gate
+
+Verify:
+
+- embedded profiles load successfully
+- profile names use canonical `<family>_v<positive integer>` identity
+- audit store configuration is valid
+- audit schema is supported or migratable
+- unsupported future schema versions stop startup
+
+Primary anchors:
+
+- [StartupValidation.cs](/C:/work/clearance-gate/src/ClearanceGate.Api/StartupValidation.cs)
+- [operations-runbook.md](/C:/work/clearance-gate/docs/operations-runbook.md)
+- [StartupFailureTests.cs](/C:/work/clearance-gate/tests/ClearanceGate.Api.Tests/StartupFailureTests.cs)
+- [AuditStoreSchemaTests.cs](/C:/work/clearance-gate/tests/ClearanceGate.Api.Tests/AuditStoreSchemaTests.cs)
+
+## Claim Gate
+
+Verify:
+
+- [security-claims.md](/C:/work/clearance-gate/docs/security-claims.md) and [claim-traceability.md](/C:/work/clearance-gate/docs/claim-traceability.md) are current
+- `scripts/check-claim-traceability.ps1` passes
+
+## Runtime Gate
+
+Verify:
+
+- `dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj --configuration Release` passes
+- audit compact/export parity remains stable
+- request idempotency remains stable
+- profile lifecycle and startup failures remain fail-closed
+
+## Formal Gate
+
+Verify:
+
+- `powershell -ExecutionPolicy Bypass -File .\scripts\run-tlc.ps1 -IncludeRed` passes
+- expected-failure models still fail for the intended bad variants
+
+## Diagnostics Gate
+
+Verify:
+
+- `GET /profiles` returns the embedded catalog view
+- `GET /profiles/latest/{family}` resolves the latest embedded version for a known family
+- authorization requests still require explicit `profile`
+
+Primary anchors:
+
+- [profile-lifecycle.md](/C:/work/clearance-gate/docs/profile-lifecycle.md)
+- [ProfileDiagnosticsTests.cs](/C:/work/clearance-gate/tests/ClearanceGate.Api.Tests/ProfileDiagnosticsTests.cs)
+
+## CI Gate
+
+The GitHub Actions workflow should publish:
+
+- traceability pass/fail
+- runtime claim summary
+- TLC summary
+- uploaded runtime and TLC artifacts
+
+Primary anchor:
+
+- [verification.yml](/C:/work/clearance-gate/.github/workflows/verification.yml)
+
+## Minimal Approval Rule
+
+A release candidate is acceptable only when:
+
+- no startup gate is bypassed
+- no claim is downgraded from `COMPLETE`
+- no expected-failure formal model turns green
+- no runtime test that covers `CG1` to `CG6` regresses

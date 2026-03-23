@@ -22,6 +22,7 @@ Repository layout:
 - `docs/` product, architecture, and formal verification strategy
 - `docs/operations-runbook.md` startup, schema, and verification runbook
 - `docs/profile-lifecycle.md` profile naming, versioning, and fail-closed lifecycle rules
+- `docs/release-readiness.md` current release gate checklist
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping

@@ -65,6 +65,13 @@ jobs:
             -OutputPath .\artifacts\test-results\summary.md
           Get-Content .\artifacts\test-results\summary.md >> $env:GITHUB_STEP_SUMMARY
 
+      - name: Publish release readiness summary
+        shell: pwsh
+        run: |
+          .\scripts\write-release-readiness-summary.ps1 `
+            -OutputPath .\artifacts\release-readiness\summary.md
+          Get-Content .\artifacts\release-readiness\summary.md >> $env:GITHUB_STEP_SUMMARY
+
       - name: Upload TLC artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -76,3 +83,9 @@ jobs:
         with:
           name: runtime-claim-results
           path: artifacts/test-results
+
+      - name: Upload release readiness artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-readiness
+          path: artifacts/release-readiness
