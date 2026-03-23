@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -105,7 +106,9 @@ public sealed class AuditStoreSchemaTests
             ConnectionString = $"Data Source={databasePath}",
         });
 
-        return new ClearanceGate.Audit.SqliteAuditStoreInitializer(options);
+        return new ClearanceGate.Audit.SqliteAuditStoreInitializer(
+            options,
+            NullLogger<ClearanceGate.Audit.SqliteAuditStoreInitializer>.Instance);
     }
 
     private static void SeedLegacyUnversionedDatabase(string databasePath)

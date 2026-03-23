@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -129,7 +130,9 @@ public sealed class SqliteDecisionAuditStoreTests
             ConnectionString = $"Data Source={databasePath}",
         });
 
-        var initializer = new ClearanceGate.Audit.SqliteAuditStoreInitializer(options);
+        var initializer = new ClearanceGate.Audit.SqliteAuditStoreInitializer(
+            options,
+            NullLogger<ClearanceGate.Audit.SqliteAuditStoreInitializer>.Instance);
         await initializer.InitializeAsync(CancellationToken.None);
         return new ClearanceGate.Audit.SqliteDecisionAuditStore(options);
     }

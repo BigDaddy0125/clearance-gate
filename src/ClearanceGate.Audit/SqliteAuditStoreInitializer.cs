@@ -1,22 +1,30 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ClearanceGate.Audit;
 
 public sealed class SqliteAuditStoreInitializer(
-    IOptions<AuditStoreOptions> options) : IAuditStoreInitializer
+    IOptions<AuditStoreOptions> options,
+    ILogger<SqliteAuditStoreInitializer> logger) : IAuditStoreInitializer
 {
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var connectionString = options.Value.ConnectionString;
         var connectionStringBuilder = new SqliteConnectionStringBuilder(connectionString);
+        var dataSource = connectionStringBuilder.DataSource;
 
-        if (!string.IsNullOrWhiteSpace(connectionStringBuilder.DataSource))
+        logger.LogInformation(
+            "Initializing audit store. DataSource={DataSource}",
+            string.IsNullOrWhiteSpace(dataSource) ? "<empty>" : dataSource);
+
+        if (!string.IsNullOrWhiteSpace(dataSource))
         {
-            var directory = Path.GetDirectoryName(Path.GetFullPath(connectionStringBuilder.DataSource));
+            var directory = Path.GetDirectoryName(Path.GetFullPath(dataSource));
             if (!string.IsNullOrWhiteSpace(directory))
             {
                 Directory.CreateDirectory(directory);
+                logger.LogInformation("Ensured audit store directory exists. Directory={Directory}", directory);
             }
         }
 
@@ -35,6 +43,11 @@ public sealed class SqliteAuditStoreInitializer(
 
         await ApplyPendingMigrationsAsync(connection, schemaVersion, cancellationToken);
         await EnsureRequiredTablesExistAsync(connection, cancellationToken);
+
+        logger.LogInformation(
+            "Audit store initialization completed. SchemaVersion={SchemaVersion} CurrentVersion={CurrentVersion}",
+            schemaVersion ?? AuditStoreSchema.CurrentVersion,
+            AuditStoreSchema.CurrentVersion);
     }
 
     private static async Task ConfigurePragmasAsync(

@@ -67,3 +67,24 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 - Treat startup validation failure as a release-blocking condition.
 - Do not bypass startup validation to recover from schema or profile errors; fix the boundary condition and restart.
 - Use [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1) after startup to confirm the bounded authorize/acknowledge/audit flow still holds.
+
+## Structured Logging Notes
+
+The current boundary now emits stable structured logs for:
+
+- startup validation start and completion
+- audit store initialization and schema readiness
+- authorization replay and authorization decision persistence
+- acknowledgment rejection and acknowledgment persistence
+- compact and export audit lookups, including not-found cases
+
+Useful fields to preserve in operators' log pipelines:
+
+- `RequestId`
+- `DecisionId`
+- `Profile`
+- `Outcome`
+- `ClearanceState`
+- `EvidenceId`
+- `LookupKind`
+- `ViewKind`

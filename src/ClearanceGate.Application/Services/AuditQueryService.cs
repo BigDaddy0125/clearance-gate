@@ -1,34 +1,64 @@
+using Microsoft.Extensions.Logging;
+
 namespace ClearanceGate.Application.Services;
 
 public sealed class AuditQueryService(
-    ClearanceGate.Audit.IDecisionAuditStore auditStore) : ClearanceGate.Application.Abstractions.IAuditQueryService
+    ClearanceGate.Audit.IDecisionAuditStore auditStore,
+    ILogger<AuditQueryService> logger) : ClearanceGate.Application.Abstractions.IAuditQueryService
 {
     public Task<ClearanceGate.Contracts.AuditRecordResponse?> GetAuditAsync(
         string decisionId,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(MapAuditRecord(auditStore.GetByDecisionId(decisionId)));
+        var record = auditStore.GetByDecisionId(decisionId);
+        LogAuditLookup("decision", decisionId, "compact", record is not null);
+        return Task.FromResult(MapAuditRecord(record));
     }
 
     public Task<ClearanceGate.Contracts.AuditRecordResponse?> GetAuditByRequestIdAsync(
         string requestId,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(MapAuditRecord(auditStore.GetByRequestId(requestId)));
+        var record = auditStore.GetByRequestId(requestId);
+        LogAuditLookup("request", requestId, "compact", record is not null);
+        return Task.FromResult(MapAuditRecord(record));
     }
 
     public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditAsync(
         string decisionId,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(MapAuditExport(auditStore.GetByDecisionId(decisionId)));
+        var record = auditStore.GetByDecisionId(decisionId);
+        LogAuditLookup("decision", decisionId, "export", record is not null);
+        return Task.FromResult(MapAuditExport(record));
     }
 
     public Task<ClearanceGate.Contracts.AuditExportResponse?> ExportAuditByRequestIdAsync(
         string requestId,
         CancellationToken cancellationToken)
     {
-        return Task.FromResult(MapAuditExport(auditStore.GetByRequestId(requestId)));
+        var record = auditStore.GetByRequestId(requestId);
+        LogAuditLookup("request", requestId, "export", record is not null);
+        return Task.FromResult(MapAuditExport(record));
+    }
+
+    private void LogAuditLookup(string lookupKind, string lookupValue, string viewKind, bool found)
+    {
+        if (found)
+        {
+            logger.LogInformation(
+                "Audit view returned record. LookupKind={LookupKind} LookupValue={LookupValue} ViewKind={ViewKind}",
+                lookupKind,
+                lookupValue,
+                viewKind);
+            return;
+        }
+
+        logger.LogWarning(
+            "Audit view did not find record. LookupKind={LookupKind} LookupValue={LookupValue} ViewKind={ViewKind}",
+            lookupKind,
+            lookupValue,
+            viewKind);
     }
 
     private static ClearanceGate.Contracts.AuditRecordResponse? MapAuditRecord(ClearanceGate.Audit.DecisionAuditRecord? record)

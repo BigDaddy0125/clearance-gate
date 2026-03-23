@@ -1,10 +1,12 @@
 using ClearanceGate.Kernel;
+using Microsoft.Extensions.Logging;
 
 namespace ClearanceGate.Application.Services;
 
 public sealed class AcknowledgmentService(
     ClearanceGate.Audit.IDecisionAuditStore auditStore,
-    ClearanceGate.Profiles.IProfileCatalog profileCatalog) : ClearanceGate.Application.Abstractions.IAcknowledgmentService
+    ClearanceGate.Profiles.IProfileCatalog profileCatalog,
+    ILogger<AcknowledgmentService> logger) : ClearanceGate.Application.Abstractions.IAcknowledgmentService
 {
     public Task<ClearanceGate.Contracts.AcknowledgmentResponse> AcknowledgeAsync(
         ClearanceGate.Contracts.AcknowledgmentRequest request,
@@ -13,6 +15,9 @@ public sealed class AcknowledgmentService(
         var decision = auditStore.GetByDecisionId(request.DecisionId);
         if (decision is null)
         {
+            logger.LogWarning(
+                "Acknowledgment rejected because decision was not found. DecisionId={DecisionId}",
+                request.DecisionId);
             throw new KeyNotFoundException($"Decision '{request.DecisionId}' was not found.");
         }
 
@@ -33,15 +38,31 @@ public sealed class AcknowledgmentService(
 
         if (writeResult.Status == ClearanceGate.Audit.AcknowledgmentWriteStatus.NotFound)
         {
+            logger.LogWarning(
+                "Acknowledgment rejected because decision disappeared before write. DecisionId={DecisionId}",
+                request.DecisionId);
             throw new KeyNotFoundException($"Decision '{request.DecisionId}' was not found.");
         }
 
         if (writeResult.Status == ClearanceGate.Audit.AcknowledgmentWriteStatus.InvalidState)
         {
+            logger.LogWarning(
+                "Acknowledgment rejected because decision was not eligible. DecisionId={DecisionId} ClearanceState={ClearanceState}",
+                request.DecisionId,
+                decision.ClearanceState);
             throw new InvalidOperationException($"Decision '{request.DecisionId}' is not eligible for acknowledgment.");
         }
 
         var updatedRecord = writeResult.Record!;
+
+        logger.LogInformation(
+            "Acknowledgment recorded. DecisionId={DecisionId} AcknowledgerId={AcknowledgerId} Outcome={Outcome} ClearanceState={ClearanceState} EvidenceId={EvidenceId} Status={Status}",
+            updatedRecord.DecisionId,
+            updatedRecord.AcknowledgerId,
+            updatedRecord.Outcome,
+            updatedRecord.ClearanceState,
+            updatedRecord.EvidenceId,
+            writeResult.Status);
 
         var response = new ClearanceGate.Contracts.AcknowledgmentResponse(
             updatedRecord.DecisionId,
@@ -52,7 +73,7 @@ public sealed class AcknowledgmentService(
         return Task.FromResult(response);
     }
 
-    private static void EnsureRoleAllowed(
+    private void EnsureRoleAllowed(
         ClearanceGate.Profiles.ClearanceProfile profile,
         string actualRole,
         string requiredRole,
@@ -60,12 +81,23 @@ public sealed class AcknowledgmentService(
     {
         if (!profile.ResponsibilityRoles.Contains(requiredRole, StringComparer.Ordinal))
         {
+            logger.LogWarning(
+                "Acknowledgment boundary rejected profile role mapping. Profile={Profile} RequiredRole={RequiredRole} Operation={Operation}",
+                profile.Profile,
+                requiredRole,
+                operation);
             throw new InvalidOperationException(
                 $"Profile '{profile.Profile}' does not permit role '{requiredRole}' for {operation}.");
         }
 
         if (!string.Equals(actualRole, requiredRole, StringComparison.Ordinal))
         {
+            logger.LogWarning(
+                "Acknowledgment boundary rejected caller role. Profile={Profile} ActualRole={ActualRole} RequiredRole={RequiredRole} Operation={Operation}",
+                profile.Profile,
+                actualRole,
+                requiredRole,
+                operation);
             throw new ArgumentException(
                 $"Role '{actualRole}' is not permitted for {operation}; expected '{requiredRole}'.");
         }

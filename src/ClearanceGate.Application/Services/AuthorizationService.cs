@@ -1,11 +1,13 @@
 using ClearanceGate.Kernel;
+using Microsoft.Extensions.Logging;
 
 namespace ClearanceGate.Application.Services;
 
 public sealed class AuthorizationService(
     ClearanceGate.Policy.IPolicyEvaluator policyEvaluator,
     ClearanceGate.Audit.IDecisionAuditStore auditStore,
-    ClearanceGate.Profiles.IProfileCatalog profileCatalog) : ClearanceGate.Application.Abstractions.IAuthorizationService
+    ClearanceGate.Profiles.IProfileCatalog profileCatalog,
+    ILogger<AuthorizationService> logger) : ClearanceGate.Application.Abstractions.IAuthorizationService
 {
     public Task<ClearanceGate.Contracts.AuthorizationResponse> AuthorizeAsync(
         ClearanceGate.Contracts.AuthorizationRequest request,
@@ -14,6 +16,12 @@ public sealed class AuthorizationService(
         var existingRecord = auditStore.GetByRequestId(request.RequestId);
         if (existingRecord is not null)
         {
+            logger.LogInformation(
+                "Authorization request replayed existing record. RequestId={RequestId} DecisionId={DecisionId} Outcome={Outcome} ClearanceState={ClearanceState}",
+                request.RequestId,
+                existingRecord.DecisionId,
+                existingRecord.Outcome,
+                existingRecord.ClearanceState);
             return Task.FromResult(ToResponse(existingRecord));
         }
 
@@ -57,10 +65,20 @@ public sealed class AuthorizationService(
             throw new InvalidOperationException($"Evidence for decision '{request.DecisionId}' was not stored.");
         }
 
+        logger.LogInformation(
+            "Authorization decision recorded. RequestId={RequestId} DecisionId={DecisionId} Profile={Profile} Outcome={Outcome} ClearanceState={ClearanceState} EvidenceId={EvidenceId} ConstraintCount={ConstraintCount}",
+            savedRecord.RequestId,
+            savedRecord.DecisionId,
+            savedRecord.Profile,
+            savedRecord.Outcome,
+            savedRecord.ClearanceState,
+            savedRecord.EvidenceId,
+            savedRecord.ConstraintsApplied.Count);
+
         return Task.FromResult(ToResponse(savedRecord));
     }
 
-    private static void EnsureRoleAllowed(
+    private void EnsureRoleAllowed(
         ClearanceGate.Profiles.ClearanceProfile profile,
         string actualRole,
         string requiredRole,
@@ -68,12 +86,23 @@ public sealed class AuthorizationService(
     {
         if (!profile.ResponsibilityRoles.Contains(requiredRole, StringComparer.Ordinal))
         {
+            logger.LogWarning(
+                "Authorization boundary rejected profile role mapping. Profile={Profile} RequiredRole={RequiredRole} Operation={Operation}",
+                profile.Profile,
+                requiredRole,
+                operation);
             throw new InvalidOperationException(
                 $"Profile '{profile.Profile}' does not permit role '{requiredRole}' for {operation}.");
         }
 
         if (!string.Equals(actualRole, requiredRole, StringComparison.Ordinal))
         {
+            logger.LogWarning(
+                "Authorization boundary rejected caller role. Profile={Profile} ActualRole={ActualRole} RequiredRole={RequiredRole} Operation={Operation}",
+                profile.Profile,
+                actualRole,
+                requiredRole,
+                operation);
             throw new ArgumentException(
                 $"Role '{actualRole}' is not permitted for {operation}; expected '{requiredRole}'.");
         }

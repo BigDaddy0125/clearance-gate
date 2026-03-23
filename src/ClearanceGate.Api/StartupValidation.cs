@@ -11,13 +11,21 @@ public static class StartupValidation
     {
         try
         {
-            _ = services.GetRequiredService<IOptions<ClearanceGate.Audit.AuditStoreOptions>>().Value;
+            logger.LogInformation("Starting fail-closed startup validation.");
+
+            var auditStoreOptions = services.GetRequiredService<IOptions<ClearanceGate.Audit.AuditStoreOptions>>().Value;
+            logger.LogInformation(
+                "Audit store configuration resolved for startup validation. ConnectionStringPresent={ConnectionStringPresent}",
+                !string.IsNullOrWhiteSpace(auditStoreOptions.ConnectionString));
 
             // Force profile catalog construction at startup so invalid embedded profiles fail closed.
             _ = services.GetRequiredService<ClearanceGate.Profiles.IProfileCatalog>();
+            logger.LogInformation("Embedded profile catalog loaded during startup validation.");
 
             await services.GetRequiredService<ClearanceGate.Audit.IAuditStoreInitializer>()
                 .InitializeAsync(cancellationToken);
+
+            logger.LogInformation("Startup validation completed successfully.");
         }
         catch (Exception exception) when (exception is not ClearanceGateStartupException)
         {
