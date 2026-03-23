@@ -88,3 +88,7 @@ Useful fields to preserve in operators' log pipelines:
 - `EvidenceId`
 - `LookupKind`
 - `ViewKind`
+
+Reference:
+
+- [observability-contract.md](/C:/work/clearance-gate/docs/observability-contract.md)

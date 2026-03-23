@@ -6,6 +6,12 @@ public sealed class AuditQueryService(
     ClearanceGate.Audit.IDecisionAuditStore auditStore,
     ILogger<AuditQueryService> logger) : ClearanceGate.Application.Abstractions.IAuditQueryService
 {
+    private static class LogEvents
+    {
+        public static readonly EventId LookupReturned = new(3200, nameof(LookupReturned));
+        public static readonly EventId LookupNotFound = new(3201, nameof(LookupNotFound));
+    }
+
     public Task<ClearanceGate.Contracts.AuditRecordResponse?> GetAuditAsync(
         string decisionId,
         CancellationToken cancellationToken)
@@ -47,6 +53,7 @@ public sealed class AuditQueryService(
         if (found)
         {
             logger.LogInformation(
+                LogEvents.LookupReturned,
                 "Audit view returned record. LookupKind={LookupKind} LookupValue={LookupValue} ViewKind={ViewKind}",
                 lookupKind,
                 lookupValue,
@@ -55,6 +62,7 @@ public sealed class AuditQueryService(
         }
 
         logger.LogWarning(
+            LogEvents.LookupNotFound,
             "Audit view did not find record. LookupKind={LookupKind} LookupValue={LookupValue} ViewKind={ViewKind}",
             lookupKind,
             lookupValue,

@@ -8,6 +8,13 @@ public sealed class SqliteAuditStoreInitializer(
     IOptions<AuditStoreOptions> options,
     ILogger<SqliteAuditStoreInitializer> logger) : IAuditStoreInitializer
 {
+    private static class LogEvents
+    {
+        public static readonly EventId InitializationStarted = new(2000, nameof(InitializationStarted));
+        public static readonly EventId DirectoryReady = new(2001, nameof(DirectoryReady));
+        public static readonly EventId InitializationCompleted = new(2002, nameof(InitializationCompleted));
+    }
+
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var connectionString = options.Value.ConnectionString;
@@ -15,6 +22,7 @@ public sealed class SqliteAuditStoreInitializer(
         var dataSource = connectionStringBuilder.DataSource;
 
         logger.LogInformation(
+            LogEvents.InitializationStarted,
             "Initializing audit store. DataSource={DataSource}",
             string.IsNullOrWhiteSpace(dataSource) ? "<empty>" : dataSource);
 
@@ -24,7 +32,7 @@ public sealed class SqliteAuditStoreInitializer(
             if (!string.IsNullOrWhiteSpace(directory))
             {
                 Directory.CreateDirectory(directory);
-                logger.LogInformation("Ensured audit store directory exists. Directory={Directory}", directory);
+                logger.LogInformation(LogEvents.DirectoryReady, "Ensured audit store directory exists. Directory={Directory}", directory);
             }
         }
 
@@ -45,6 +53,7 @@ public sealed class SqliteAuditStoreInitializer(
         await EnsureRequiredTablesExistAsync(connection, cancellationToken);
 
         logger.LogInformation(
+            LogEvents.InitializationCompleted,
             "Audit store initialization completed. SchemaVersion={SchemaVersion} CurrentVersion={CurrentVersion}",
             schemaVersion ?? AuditStoreSchema.CurrentVersion,
             AuditStoreSchema.CurrentVersion);

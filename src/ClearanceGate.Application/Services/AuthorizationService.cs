@@ -9,6 +9,14 @@ public sealed class AuthorizationService(
     ClearanceGate.Profiles.IProfileCatalog profileCatalog,
     ILogger<AuthorizationService> logger) : ClearanceGate.Application.Abstractions.IAuthorizationService
 {
+    private static class LogEvents
+    {
+        public static readonly EventId ReplayReturned = new(3000, nameof(ReplayReturned));
+        public static readonly EventId DecisionRecorded = new(3001, nameof(DecisionRecorded));
+        public static readonly EventId ProfileRoleRejected = new(3002, nameof(ProfileRoleRejected));
+        public static readonly EventId CallerRoleRejected = new(3003, nameof(CallerRoleRejected));
+    }
+
     public Task<ClearanceGate.Contracts.AuthorizationResponse> AuthorizeAsync(
         ClearanceGate.Contracts.AuthorizationRequest request,
         CancellationToken cancellationToken)
@@ -17,6 +25,7 @@ public sealed class AuthorizationService(
         if (existingRecord is not null)
         {
             logger.LogInformation(
+                LogEvents.ReplayReturned,
                 "Authorization request replayed existing record. RequestId={RequestId} DecisionId={DecisionId} Outcome={Outcome} ClearanceState={ClearanceState}",
                 request.RequestId,
                 existingRecord.DecisionId,
@@ -66,6 +75,7 @@ public sealed class AuthorizationService(
         }
 
         logger.LogInformation(
+            LogEvents.DecisionRecorded,
             "Authorization decision recorded. RequestId={RequestId} DecisionId={DecisionId} Profile={Profile} Outcome={Outcome} ClearanceState={ClearanceState} EvidenceId={EvidenceId} ConstraintCount={ConstraintCount}",
             savedRecord.RequestId,
             savedRecord.DecisionId,
@@ -87,6 +97,7 @@ public sealed class AuthorizationService(
         if (!profile.ResponsibilityRoles.Contains(requiredRole, StringComparer.Ordinal))
         {
             logger.LogWarning(
+                LogEvents.ProfileRoleRejected,
                 "Authorization boundary rejected profile role mapping. Profile={Profile} RequiredRole={RequiredRole} Operation={Operation}",
                 profile.Profile,
                 requiredRole,
@@ -98,6 +109,7 @@ public sealed class AuthorizationService(
         if (!string.Equals(actualRole, requiredRole, StringComparison.Ordinal))
         {
             logger.LogWarning(
+                LogEvents.CallerRoleRejected,
                 "Authorization boundary rejected caller role. Profile={Profile} ActualRole={ActualRole} RequiredRole={RequiredRole} Operation={Operation}",
                 profile.Profile,
                 actualRole,
