@@ -19,6 +19,11 @@ Profiles do not define new authorization outcomes.
 
 Profiles do not weaken kernel fail-closed behavior.
 
+Current embedded families:
+
+- `itops_deployment_v1` remains the primary pilot profile
+- `incident_mitigation_v1` is a narrow second family added as post-`v0` profile expansion
+
 ## Identity Rule
 
 Every profile name must use canonical versioned identity:

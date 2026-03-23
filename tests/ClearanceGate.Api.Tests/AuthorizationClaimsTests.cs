@@ -389,6 +389,37 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal("AWAITING_ACK", auditPayload.AuthorizationTimeline[0].State);
     }
 
+    [Fact]
+    public async Task SecondEmbeddedProfile_ProjectsItsOwnRiskConstraint()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+        var request = BuildAuthorizationRequest(
+            "req-claim-incident-1",
+            "dec-claim-incident-1",
+            new[] { "CUSTOMER_IMPACT" },
+            "alice",
+            "incident-console") with
+        {
+            Profile = "incident_mitigation_v1",
+            Action = new ClearanceGate.Contracts.ActionDescriptor("rollback", "Rollback degraded production release"),
+        };
+
+        var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
+        var authorizePayload = await authorizeResponse.Content.ReadFromJsonAsync<ClearanceGate.Contracts.AuthorizationResponse>();
+        var exportPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditExportResponse>("/audit/dec-claim-incident-1/export");
+
+        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
+        Assert.NotNull(authorizePayload);
+        Assert.Equal("REQUIRE_ACK", authorizePayload.Outcome);
+        Assert.Contains("INCIDENT_ACK_REQUIRED", authorizePayload.Reason.ConstraintsTriggered);
+        Assert.NotNull(exportPayload);
+        Assert.Equal("incident_mitigation_v1", exportPayload.Profile);
+        Assert.Equal("incident_mitigation_v1", exportPayload.Version.Policy);
+        Assert.Contains("INCIDENT_ACK_REQUIRED", exportPayload.ConstraintsApplied);
+    }
+
     private static ClearanceGate.Contracts.AuthorizationRequest BuildAuthorizationRequest(
         string requestId,
         string decisionId,

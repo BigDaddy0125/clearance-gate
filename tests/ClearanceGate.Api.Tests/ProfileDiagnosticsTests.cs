@@ -16,11 +16,17 @@ public sealed class ProfileDiagnosticsTests
         var response = await client.GetFromJsonAsync<ClearanceGate.Contracts.ProfileCatalogResponse>("/profiles");
 
         Assert.NotNull(response);
-        var profile = Assert.Single(response.Profiles);
-        Assert.Equal("itops_deployment_v1", profile.Profile);
-        Assert.Equal("itops_deployment", profile.Family);
-        Assert.Equal(1, profile.Version);
-        Assert.True(profile.IsLatest);
+        Assert.Equal(2, response.Profiles.Count);
+
+        var itops = Assert.Single(response.Profiles, profile => profile.Profile == "itops_deployment_v1");
+        Assert.Equal("itops_deployment", itops.Family);
+        Assert.Equal(1, itops.Version);
+        Assert.True(itops.IsLatest);
+
+        var incident = Assert.Single(response.Profiles, profile => profile.Profile == "incident_mitigation_v1");
+        Assert.Equal("incident_mitigation", incident.Family);
+        Assert.Equal(1, incident.Version);
+        Assert.True(incident.IsLatest);
     }
 
     [Fact]
@@ -48,6 +54,21 @@ public sealed class ProfileDiagnosticsTests
         var response = await client.GetAsync("/profiles/latest/missing_family");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task LatestProfileEndpoint_ReturnsLatestVersionForSecondKnownFamily()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
+        using var client = factory.CreateClient();
+
+        var response = await client.GetFromJsonAsync<ClearanceGate.Contracts.LatestProfileResponse>("/profiles/latest/incident_mitigation");
+
+        Assert.NotNull(response);
+        Assert.Equal("incident_mitigation", response.Family);
+        Assert.Equal("incident_mitigation_v1", response.Profile.Profile);
+        Assert.True(response.Profile.IsLatest);
     }
 
     private static TemporaryDatabaseHarness CreateHarness()

@@ -242,6 +242,30 @@ public sealed class ProfileLifecycleTests
         Assert.True(latest.IsLatest);
     }
 
+    [Fact]
+    public void EmbeddedProfileCatalog_ListsMultipleFamilies()
+    {
+        var catalog = new ClearanceGate.Profiles.EmbeddedProfileCatalog();
+
+        var profiles = catalog.ListProfiles();
+
+        Assert.Contains(profiles, entry => entry.Profile == "itops_deployment_v1" && entry.Family == "itops_deployment");
+        Assert.Contains(profiles, entry => entry.Profile == "incident_mitigation_v1" && entry.Family == "incident_mitigation");
+    }
+
+    [Fact]
+    public void EmbeddedProfileCatalog_ResolvesLatestProfileForIncidentMitigationFamily()
+    {
+        var catalog = new ClearanceGate.Profiles.EmbeddedProfileCatalog();
+
+        var latest = catalog.GetLatestProfile("incident_mitigation");
+
+        Assert.Equal("incident_mitigation_v1", latest.Profile);
+        Assert.Equal("incident_mitigation", latest.Family);
+        Assert.Equal(1, latest.Version);
+        Assert.True(latest.IsLatest);
+    }
+
     private static ClearanceGate.Profiles.ClearanceProfile CreateProfile(string profileName) =>
         new(
             profileName,

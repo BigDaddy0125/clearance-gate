@@ -1,0 +1,26 @@
+{
+  "profile": "incident_mitigation_v1",
+  "description": "Initial profile for mitigation and rollback authorization during active incidents.",
+  "responsibilityRoles": [
+    "decision_owner",
+    "acknowledging_authority",
+    "audit_reviewer"
+  ],
+  "constraints": [
+    {
+      "id": "INCIDENT_ACK_REQUIRED",
+      "kind": "ack_required",
+      "whenRiskFlagPresent": "CUSTOMER_IMPACT"
+    },
+    {
+      "id": "OWNER_REQUIRED",
+      "kind": "required_field",
+      "field": "responsibility.owner"
+    },
+    {
+      "id": "SOURCE_REQUIRED",
+      "kind": "required_field",
+      "field": "metadata.source_system"
+    }
+  ]
+}
