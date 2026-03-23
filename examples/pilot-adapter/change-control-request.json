@@ -1,0 +1,19 @@
+{
+  "ticketId": "req-example-risk-1",
+  "executionId": "dec-example-risk-1",
+  "operation": {
+    "kind": "deploy",
+    "summary": "Promote release 2026.03.18"
+  },
+  "changeWindow": "business-hours",
+  "riskIndicators": [
+    "HIGH_IMPACT"
+  ],
+  "requester": {
+    "id": "alice"
+  },
+  "source": {
+    "system": "change-control",
+    "recordedAt": "2026-03-18T10:00:00Z"
+  }
+}

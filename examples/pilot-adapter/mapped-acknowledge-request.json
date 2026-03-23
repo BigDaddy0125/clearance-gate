@@ -1,0 +1,11 @@
+{
+  "decisionId": "dec-example-risk-1",
+  "acknowledger": {
+    "id": "alice",
+    "role": "acknowledging_authority"
+  },
+  "acknowledgment": {
+    "type": "risk_acceptance",
+    "timestamp": "2026-03-18T10:05:00Z"
+  }
+}
