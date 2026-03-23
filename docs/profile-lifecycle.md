@@ -94,4 +94,10 @@ The next lifecycle step should be small and explicit:
 
 - add a read-only latest-version resolver for operations and diagnostics
 
+Current status:
+
+- read-only latest-version diagnostics now exist in the embedded catalog and API
+- callers still must send an explicit profile id on authorization requests
+- diagnostics do not change runtime selection semantics
+
 That resolver should not change the current request rule that callers send an explicit profile id.

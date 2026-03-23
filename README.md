@@ -44,3 +44,4 @@ Operational note:
 
 - startup performs fail-closed validation of embedded profiles and the audit store schema before serving requests
 - unsupported audit schema versions or invalid profile catalogs must stop the process rather than degrade open
+- read-only profile diagnostics are available without changing the rule that authorization requests must specify an explicit profile id

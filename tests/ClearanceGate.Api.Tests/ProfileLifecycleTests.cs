@@ -229,6 +229,19 @@ public sealed class ProfileLifecycleTests
         Assert.Null(identity);
     }
 
+    [Fact]
+    public void EmbeddedProfileCatalog_ResolvesLatestProfileByFamily()
+    {
+        var catalog = new ClearanceGate.Profiles.EmbeddedProfileCatalog();
+
+        var latest = catalog.GetLatestProfile("itops_deployment");
+
+        Assert.Equal("itops_deployment_v1", latest.Profile);
+        Assert.Equal("itops_deployment", latest.Family);
+        Assert.Equal(1, latest.Version);
+        Assert.True(latest.IsLatest);
+    }
+
     private static ClearanceGate.Profiles.ClearanceProfile CreateProfile(string profileName) =>
         new(
             profileName,

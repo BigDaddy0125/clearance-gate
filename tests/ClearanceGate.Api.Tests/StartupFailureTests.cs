@@ -119,6 +119,12 @@ public sealed class StartupFailureTests
 
         public ClearanceGate.Profiles.ClearanceProfile GetRequiredProfile(string profileName) =>
             throw new InvalidOperationException(message);
+
+        public IReadOnlyList<ClearanceGate.Profiles.ProfileCatalogEntry> ListProfiles() =>
+            throw new InvalidOperationException(message);
+
+        public ClearanceGate.Profiles.ProfileCatalogEntry GetLatestProfile(string family) =>
+            throw new InvalidOperationException(message);
     }
 
     private sealed class TemporaryDatabaseHarness : IDisposable

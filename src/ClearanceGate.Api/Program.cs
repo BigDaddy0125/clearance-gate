@@ -146,6 +146,44 @@ app.MapGet("/audit/request/{requestId}/export",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
+app.MapGet("/profiles",
+    (ClearanceGate.Profiles.IProfileCatalog catalog) =>
+    {
+        var response = new ClearanceGate.Contracts.ProfileCatalogResponse(
+            catalog.ListProfiles()
+                .Select(profile => new ClearanceGate.Contracts.ProfileCatalogItemResponse(
+                    profile.Profile,
+                    profile.Family,
+                    profile.Version,
+                    profile.Description,
+                    profile.IsLatest))
+                .ToArray());
+
+        return TypedResults.Ok(response);
+    });
+
+app.MapGet("/profiles/latest/{family}",
+    IResult (string family, ClearanceGate.Profiles.IProfileCatalog catalog) =>
+    {
+        try
+        {
+            var latest = catalog.GetLatestProfile(family);
+            var response = new ClearanceGate.Contracts.LatestProfileResponse(
+                latest.Family,
+                new ClearanceGate.Contracts.ProfileCatalogItemResponse(
+                    latest.Profile,
+                    latest.Family,
+                    latest.Version,
+                    latest.Description,
+                    latest.IsLatest));
+            return TypedResults.Ok(response);
+        }
+        catch (KeyNotFoundException)
+        {
+            return TypedResults.NotFound();
+        }
+    });
+
 app.Run();
 
 public partial class Program;

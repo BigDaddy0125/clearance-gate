@@ -52,6 +52,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 - `GET /audit/{decisionId}/export` returns a fuller reconstructable envelope for external review or archival export.
 - `GET /audit/request/{requestId}/export` returns the fuller reconstructable envelope keyed by request id for idempotent external reconciliation.
 
+## Profile Diagnostics Notes
+
+- `GET /profiles` returns the embedded profile catalog with family/version metadata.
+- `GET /profiles/latest/{family}` returns the latest embedded version for a known profile family.
+- These diagnostics are read-only; authorization requests still must declare an explicit profile id.
+
 ## Deployment Notes
 
 - Set `ConnectionStrings__AuditStore` explicitly in non-local environments.
