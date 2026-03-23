@@ -29,11 +29,7 @@ $resolvedOutputRoot = [System.IO.Path]::GetFullPath($resolvedOutputRootInput)
 [System.IO.Directory]::CreateDirectory($resolvedOutputRoot) | Out-Null
 $runId = [Guid]::NewGuid().ToString("N")
 
-$profileConfigOutputPath = Join-Path $repoRoot "generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
-$profileRoleConfigOutputPath = Join-Path $repoRoot "generated\\tla\\itops_deployment_v1_profile_role_conformance.cfg"
-& (Join-Path $PSScriptRoot "generate-profile-tla-config.ps1") `
-    -OutputPath $profileConfigOutputPath `
-    -RoleOutputPath $profileRoleConfigOutputPath
+& (Join-Path $PSScriptRoot "generate-all-profile-tla-configs.ps1")
 
 $models = @(
     @{
@@ -59,20 +55,31 @@ $models = @(
         Spec = ".\\tla\\specs\\DurableEvidenceGate.tla"
         Config = ".\\tla\\models\\durable_evidence_ok.cfg"
         ExpectSuccess = $true
-    },
-    @{
-        Name = "profile_conformance_ok"
-        Spec = ".\\tla\\specs\\ProfileConformance.tla"
-        Config = ".\\generated\\tla\\itops_deployment_v1_profile_conformance.cfg"
-        ExpectSuccess = $true
-    },
-    @{
-        Name = "profile_role_conformance_ok"
-        Spec = ".\\tla\\specs\\ProfileRoleConformance.tla"
-        Config = ".\\generated\\tla\\itops_deployment_v1_profile_role_conformance.cfg"
-        ExpectSuccess = $true
     }
 )
+
+$generatedProfileConfigs = Get-ChildItem -Path (Join-Path $repoRoot "generated\\tla") -Filter "*_profile_conformance.cfg" -File |
+    Sort-Object Name
+$generatedRoleConfigs = Get-ChildItem -Path (Join-Path $repoRoot "generated\\tla") -Filter "*_profile_role_conformance.cfg" -File |
+    Sort-Object Name
+
+foreach ($config in $generatedProfileConfigs) {
+    $models += @{
+        Name = [System.IO.Path]::GetFileNameWithoutExtension($config.Name)
+        Spec = ".\\tla\\specs\\ProfileConformance.tla"
+        Config = (".\\generated\\tla\\" + $config.Name)
+        ExpectSuccess = $true
+    }
+}
+
+foreach ($config in $generatedRoleConfigs) {
+    $models += @{
+        Name = [System.IO.Path]::GetFileNameWithoutExtension($config.Name)
+        Spec = ".\\tla\\specs\\ProfileRoleConformance.tla"
+        Config = (".\\generated\\tla\\" + $config.Name)
+        ExpectSuccess = $true
+    }
+}
 
 if ($IncludeRed) {
     $models += @(

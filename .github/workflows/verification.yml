@@ -37,6 +37,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-claim-traceability.ps1
 
+      - name: Generate profile TLC configs
+        shell: pwsh
+        run: .\scripts\generate-all-profile-tla-configs.ps1
+
       - name: Runtime claim tests
         run: >
           dotnet test .\tests\ClearanceGate.Api.Tests\ClearanceGate.Api.Tests.csproj
@@ -77,6 +81,12 @@ jobs:
         with:
           name: tlc-logs
           path: artifacts/tlc
+
+      - name: Upload generated profile TLC configs
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-profile-tla-configs
+          path: generated/tla
 
       - name: Upload runtime claim artifacts
         uses: actions/upload-artifact@v4
