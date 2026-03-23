@@ -61,5 +61,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-claim-traceability.ps1
 ## Deployment Notes
 
 - Set `ConnectionStrings__AuditStore` explicitly in non-local environments.
+- Use [appsettings.Production.example.json](/C:/work/clearance-gate/examples/deployment/appsettings.Production.example.json) only as a shape reference; keep the real database path environment-specific.
+- Keep the SQLite audit file in a dedicated writable directory outside the repository checkout.
+- Back up the audit database file before upgrades or pilot resets.
 - Treat startup validation failure as a release-blocking condition.
 - Do not bypass startup validation to recover from schema or profile errors; fix the boundary condition and restart.
+- Use [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1) after startup to confirm the bounded authorize/acknowledge/audit flow still holds.

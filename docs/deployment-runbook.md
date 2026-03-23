@@ -29,6 +29,10 @@ At minimum, set:
 - application working directory
 - `ConnectionStrings__AuditStore`
 
+Reference example:
+
+- [appsettings.Production.example.json](/C:/work/clearance-gate/examples/deployment/appsettings.Production.example.json)
+
 Example value:
 
 ```text
@@ -75,6 +79,12 @@ Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles
 Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles/latest/itops_deployment
 ```
 
+Recommended operational note:
+
+- place the SQLite file under a dedicated writable directory such as `C:\clearancegate-data`
+- keep that directory outside the repo working tree
+- treat the database file as pilot evidence and back it up before any upgrade or reset
+
 ## Pilot Smoke Flow
 
 Run one bounded smoke sequence:
@@ -87,6 +97,13 @@ Run one bounded smoke sequence:
 Reference:
 
 - [api-examples.md](/C:/work/clearance-gate/docs/api-examples.md)
+- [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1)
+
+Example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-deployment-smoke-check.ps1
+```
 
 ## Failure Handling
 
@@ -107,6 +124,7 @@ If runtime smoke flow fails:
 For `v0`, upgrades must remain conservative:
 
 - do not silently change the audit store path
+- back up the SQLite audit file before replacing binaries or changing configuration
 - do not auto-select newer profile versions for callers
 - do not skip startup validation
 
