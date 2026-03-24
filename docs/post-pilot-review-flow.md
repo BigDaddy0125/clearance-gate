@@ -29,9 +29,9 @@ The package should already contain:
 ## Review Steps
 
 1. Prepare a review directory with [prepare-post-pilot-review.ps1](/C:/work/clearance-gate/scripts/prepare-post-pilot-review.ps1).
-2. Read the evidence manifest and confirm the `requestId`, `decisionId`, `evidenceId`, final `outcome`, and final `clearanceState`.
+2. Read the generated `decision-memo-draft.md` and confirm the `requestId`, `decisionId`, `evidenceId`, final `outcome`, and final `clearanceState`.
 3. Review the pilot against [pilot-acceptance-checklist.md](/C:/work/clearance-gate/docs/pilot-acceptance-checklist.md).
-4. Fill out [post-pilot-decision-memo.md](/C:/work/clearance-gate/docs/post-pilot-decision-memo.md) using the prepared review directory.
+4. Finish the generated memo draft using [post-pilot-decision-memo.md](/C:/work/clearance-gate/docs/post-pilot-decision-memo.md) as the source template.
 5. Compare any approved next work against [v1-backlog.md](/C:/work/clearance-gate/docs/v1-backlog.md).
 
 ## Decision Rule

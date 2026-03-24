@@ -50,6 +50,7 @@ Repository layout:
 - `scripts/capture-pilot-sample-session.ps1` runs the sample path with unique ids and packages the resulting evidence
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
 - `scripts/prepare-post-pilot-review.ps1` turns a pilot evidence package into a focused post-pilot review directory
+- `scripts/initialize-post-pilot-decision-memo.ps1` generates a decision memo draft from the latest prepared review
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 

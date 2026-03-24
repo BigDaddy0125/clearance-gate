@@ -105,8 +105,11 @@ $reviewManifest = [ordered]@{
         "evidence/audit-compact.json",
         "evidence/audit-export.json"
     )
+    decisionMemoDraft = "decision-memo-draft.md"
 }
 
 $reviewManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $reviewRoot "review-manifest.json")
+
+& (Join-Path $repoRoot "scripts\initialize-post-pilot-decision-memo.ps1") -ReviewRoot $reviewRoot | Out-Null
 
 Write-Host ("Prepared post-pilot review at " + $reviewRoot)

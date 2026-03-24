@@ -7,6 +7,7 @@ Its purpose is to make the next decision explicit instead of letting scope drift
 Recommended preparation:
 
 - start from a review directory produced by [prepare-post-pilot-review.ps1](/C:/work/clearance-gate/scripts/prepare-post-pilot-review.ps1)
+- start from the generated `decision-memo-draft.md` in that review directory
 - follow [post-pilot-review-flow.md](/C:/work/clearance-gate/docs/post-pilot-review-flow.md)
 
 ## Snapshot
