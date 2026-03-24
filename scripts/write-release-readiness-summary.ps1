@@ -32,6 +32,8 @@ $operatorLoggingGuidePath = Join-Path $repoRoot "docs\\operator-logging-guide.md
 $callerOnboardingGuidePath = Join-Path $repoRoot "docs\\caller-onboarding-checklist.md"
 $pilotExecutionChecklistPath = Join-Path $repoRoot "docs\\pilot-execution-checklist.md"
 $pilotIncidentResponsePath = Join-Path $repoRoot "docs\\pilot-incident-response.md"
+$pilotEvidencePackageGuidePath = Join-Path $repoRoot "docs\\pilot-evidence-package.md"
+$pilotEvidencePackagingScriptPath = Join-Path $repoRoot "scripts\\package-pilot-evidence.ps1"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
@@ -40,6 +42,8 @@ $operatorLoggingGuideStatus = if (Test-Path $operatorLoggingGuidePath) { "PRESEN
 $callerOnboardingGuideStatus = if (Test-Path $callerOnboardingGuidePath) { "PRESENT" } else { "MISSING" }
 $pilotExecutionChecklistStatus = if (Test-Path $pilotExecutionChecklistPath) { "PRESENT" } else { "MISSING" }
 $pilotIncidentResponseStatus = if (Test-Path $pilotIncidentResponsePath) { "PRESENT" } else { "MISSING" }
+$pilotEvidencePackageGuideStatus = if (Test-Path $pilotEvidencePackageGuidePath) { "PRESENT" } else { "MISSING" }
+$pilotEvidencePackagingScriptStatus = if (Test-Path $pilotEvidencePackagingScriptPath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
@@ -71,6 +75,8 @@ $summaryLines = @(
     "| Caller Onboarding Guide | $callerOnboardingGuideStatus | docs/caller-onboarding-checklist.md |",
     "| Pilot Execution Checklist | $pilotExecutionChecklistStatus | docs/pilot-execution-checklist.md |",
     "| Pilot Incident Response | $pilotIncidentResponseStatus | docs/pilot-incident-response.md |",
+    "| Pilot Evidence Guide | $pilotEvidencePackageGuideStatus | docs/pilot-evidence-package.md |",
+    "| Pilot Evidence Script | $pilotEvidencePackagingScriptStatus | scripts/package-pilot-evidence.ps1 |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 

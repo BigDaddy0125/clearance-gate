@@ -1,6 +1,13 @@
 {
   "profiles": [
     {
+      "profile": "incident_mitigation_v1",
+      "family": "incident_mitigation",
+      "version": 1,
+      "description": "Initial profile for mitigation and rollback authorization.",
+      "isLatest": true
+    },
+    {
       "profile": "itops_deployment_v1",
       "family": "itops_deployment",
       "version": 1,

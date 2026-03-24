@@ -69,7 +69,8 @@ $documentsToCopy = @(
     "docs\release-readiness.md",
     "docs\operations-runbook.md",
     "docs\observability-contract.md",
-    "docs\api-examples.md"
+    "docs\api-examples.md",
+    "docs\pilot-evidence-package.md"
 )
 
 foreach ($relativePath in $documentsToCopy) {
@@ -106,7 +107,8 @@ $manifest = [ordered]@{
         "docs/release-readiness.md",
         "docs/operations-runbook.md",
         "docs/observability-contract.md",
-        "docs/api-examples.md"
+        "docs/api-examples.md",
+        "docs/pilot-evidence-package.md"
     )
     includedExamples = @(
         "examples/deployment/appsettings.Production.example.json"

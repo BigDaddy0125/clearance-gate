@@ -44,7 +44,8 @@ $requiredDocs = @(
     "release-readiness.md",
     "operations-runbook.md",
     "observability-contract.md",
-    "api-examples.md"
+    "api-examples.md",
+    "pilot-evidence-package.md"
 )
 
 foreach ($doc in $requiredDocs) {

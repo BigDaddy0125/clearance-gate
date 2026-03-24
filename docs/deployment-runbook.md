@@ -115,6 +115,7 @@ Reference:
 
 - [api-examples.md](/C:/work/clearance-gate/docs/api-examples.md)
 - [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1)
+- [package-pilot-evidence.ps1](/C:/work/clearance-gate/scripts/package-pilot-evidence.ps1)
 - [publish-release-bundle.ps1](/C:/work/clearance-gate/scripts/publish-release-bundle.ps1)
 - [pilot-execution-checklist.md](/C:/work/clearance-gate/docs/pilot-execution-checklist.md)
 
@@ -137,6 +138,28 @@ Also preserve:
 - the export audit view
 
 Use the smoke-check as a bridge from deployment verification to durable evidence verification.
+
+## Pilot Evidence Packaging
+
+After a successful smoke-check or pilot session, package the resulting evidence for review:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package-pilot-evidence.ps1
+```
+
+This produces a timestamped directory under `artifacts/pilot-evidence` containing:
+
+- release bundle manifest
+- release-readiness summary
+- compact audit response
+- export audit response
+- authorize and acknowledge responses
+- profile diagnostics response
+- operator and pilot execution guides
+
+Reference:
+
+- [pilot-evidence-package.md](/C:/work/clearance-gate/docs/pilot-evidence-package.md)
 
 ## Failure Handling
 

@@ -104,6 +104,14 @@ Verify:
 - [pilot-execution-checklist.md](/C:/work/clearance-gate/docs/pilot-execution-checklist.md) is current
 - [pilot-incident-response.md](/C:/work/clearance-gate/docs/pilot-incident-response.md) is current
 
+## Pilot Evidence Gate
+
+Verify:
+
+- [pilot-evidence-package.md](/C:/work/clearance-gate/docs/pilot-evidence-package.md) is current
+- [package-pilot-evidence.ps1](/C:/work/clearance-gate/scripts/package-pilot-evidence.ps1) is present and usable
+- the release bundle includes the pilot evidence guide
+
 ## Minimal Approval Rule
 
 A release candidate is acceptable only when:

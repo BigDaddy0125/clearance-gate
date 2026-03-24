@@ -32,6 +32,7 @@ Repository layout:
 - `docs/pilot-execution-checklist.md` operator checklist for the actual pilot execution window
 - `docs/pilot-sample-session.md` one complete step-by-step pilot session
 - `docs/pilot-incident-response.md` minimum response guide when the pilot boundary appears unhealthy
+- `docs/pilot-evidence-package.md` minimum archival package for a pilot session
 - `docs/pilot-adapter-example.md` one narrow caller-side mapping example for the current pilot
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
@@ -45,6 +46,7 @@ Repository layout:
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
+- `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 
