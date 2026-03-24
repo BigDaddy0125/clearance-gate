@@ -110,6 +110,7 @@ Verify:
 
 - [pilot-evidence-package.md](/C:/work/clearance-gate/docs/pilot-evidence-package.md) is current
 - [package-pilot-evidence.ps1](/C:/work/clearance-gate/scripts/package-pilot-evidence.ps1) is present and usable
+- [capture-pilot-sample-session.ps1](/C:/work/clearance-gate/scripts/capture-pilot-sample-session.ps1) is present and usable
 - the release bundle includes the pilot evidence guide
 
 ## Minimal Approval Rule

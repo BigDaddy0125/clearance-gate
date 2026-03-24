@@ -34,6 +34,7 @@ $pilotExecutionChecklistPath = Join-Path $repoRoot "docs\\pilot-execution-checkl
 $pilotIncidentResponsePath = Join-Path $repoRoot "docs\\pilot-incident-response.md"
 $pilotEvidencePackageGuidePath = Join-Path $repoRoot "docs\\pilot-evidence-package.md"
 $pilotEvidencePackagingScriptPath = Join-Path $repoRoot "scripts\\package-pilot-evidence.ps1"
+$pilotSessionCaptureScriptPath = Join-Path $repoRoot "scripts\\capture-pilot-sample-session.ps1"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
@@ -44,6 +45,7 @@ $pilotExecutionChecklistStatus = if (Test-Path $pilotExecutionChecklistPath) { "
 $pilotIncidentResponseStatus = if (Test-Path $pilotIncidentResponsePath) { "PRESENT" } else { "MISSING" }
 $pilotEvidencePackageGuideStatus = if (Test-Path $pilotEvidencePackageGuidePath) { "PRESENT" } else { "MISSING" }
 $pilotEvidencePackagingScriptStatus = if (Test-Path $pilotEvidencePackagingScriptPath) { "PRESENT" } else { "MISSING" }
+$pilotSessionCaptureScriptStatus = if (Test-Path $pilotSessionCaptureScriptPath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
@@ -77,6 +79,7 @@ $summaryLines = @(
     "| Pilot Incident Response | $pilotIncidentResponseStatus | docs/pilot-incident-response.md |",
     "| Pilot Evidence Guide | $pilotEvidencePackageGuideStatus | docs/pilot-evidence-package.md |",
     "| Pilot Evidence Script | $pilotEvidencePackagingScriptStatus | scripts/package-pilot-evidence.ps1 |",
+    "| Pilot Session Capture Script | $pilotSessionCaptureScriptStatus | scripts/capture-pilot-sample-session.ps1 |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 

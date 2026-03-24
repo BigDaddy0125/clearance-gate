@@ -47,6 +47,7 @@ Repository layout:
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
+- `scripts/capture-pilot-sample-session.ps1` runs the sample path with unique ids and packages the resulting evidence
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
 - `scripts/prepare-post-pilot-review.ps1` turns a pilot evidence package into a focused post-pilot review directory
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery

@@ -33,6 +33,7 @@ Expected response examples:
 Runnable helper:
 
 - [run-sample-session.ps1](/C:/work/clearance-gate/examples/v0/run-sample-session.ps1)
+- [capture-pilot-sample-session.ps1](/C:/work/clearance-gate/scripts/capture-pilot-sample-session.ps1)
 
 ## Session Sequence
 
@@ -140,8 +141,24 @@ The sample session is successful only if all of the following hold:
 - audit is readable by both `decisionId` and `requestId`
 - compact and export views remain consistent
 
+## Automated Capture
+
+To run the same sample path and persist its requests, responses, and packaged evidence:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\capture-pilot-sample-session.ps1
+```
+
+This creates:
+
+- `artifacts/pilot-session-capture/...`
+- generated request payloads with unique ids
+- captured authorize/acknowledge/audit responses
+- a packaged pilot evidence directory linked from `capture-manifest.json`
+
 ## Related Docs
 
 - [api-examples.md](/C:/work/clearance-gate/docs/api-examples.md)
 - [deployment-runbook.md](/C:/work/clearance-gate/docs/deployment-runbook.md)
 - [pilot-acceptance-checklist.md](/C:/work/clearance-gate/docs/pilot-acceptance-checklist.md)
+- [pilot-evidence-package.md](/C:/work/clearance-gate/docs/pilot-evidence-package.md)

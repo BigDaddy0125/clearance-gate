@@ -45,6 +45,10 @@ The evidence manifest should include:
 
 Use [package-pilot-evidence.ps1](/C:/work/clearance-gate/scripts/package-pilot-evidence.ps1) to build the package directory.
 
+If you want to run the sample session and package evidence in one step, use:
+
+- [capture-pilot-sample-session.ps1](/C:/work/clearance-gate/scripts/capture-pilot-sample-session.ps1)
+
 The package is acceptable only if:
 
 - the release bundle validates
