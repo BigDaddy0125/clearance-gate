@@ -57,6 +57,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-real-caller-promotion-handoff.ps1
 
+      - name: Check near-real pilot handoff assets
+        shell: pwsh
+        run: .\scripts\check-near-real-pilot-handoff.ps1
+
       - name: Generate profile TLC configs
         shell: pwsh
         run: .\scripts\generate-all-profile-tla-configs.ps1
@@ -113,6 +117,10 @@ jobs:
         run: >
           .\scripts\promote-real-caller-intake.ps1
           -IntakeRoot (Get-ChildItem .\artifacts\real-caller-intake -Directory | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1).FullName
+
+      - name: Run near-real pilot dry-run
+        shell: pwsh
+        run: .\scripts\run-near-real-pilot-dry-run.ps1
 
       - name: TLC green models
         shell: pwsh
@@ -194,3 +202,9 @@ jobs:
         with:
           name: real-caller-promotion
           path: artifacts/real-caller-promotion
+
+      - name: Upload near-real pilot dry-run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: near-real-pilot-dry-run
+          path: artifacts/near-real-pilot-dry-run

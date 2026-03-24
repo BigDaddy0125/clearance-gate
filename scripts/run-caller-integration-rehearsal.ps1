@@ -5,7 +5,8 @@ param(
     [string]$AuditStorePath = "",
     [string]$Profile = "itops_deployment_v1",
     [string]$AuthorizeInputPath = "",
-    [string]$AcknowledgeInputPath = ""
+    [string]$AcknowledgeInputPath = "",
+    [switch]$UseExistingHost
 )
 
 Set-StrictMode -Version Latest
@@ -55,22 +56,6 @@ $resolvedAuditStorePath =
     -Profile $Profile | Out-Null
 & (Join-Path $repoRoot "scripts\prepare-caller-integration-review.ps1") | Out-Null
 
-$publishRoot = Join-Path $repoRoot "artifacts\publish\app"
-$publishedExe = Join-Path $publishRoot "ClearanceGate.Api.exe"
-$publishedDll = Join-Path $publishRoot "ClearanceGate.Api.dll"
-
-if (Test-Path $publishedExe) {
-    $hostCommand = $publishedExe
-    $hostArguments = @("--urls", $BaseUrl)
-}
-elseif (Test-Path $publishedDll) {
-    $hostCommand = "dotnet"
-    $hostArguments = @($publishedDll, "--urls", $BaseUrl)
-}
-else {
-    throw "Published API host is missing from '$publishRoot'."
-}
-
 $rehearsalName = "caller-integration-rehearsal-" + [DateTime]::UtcNow.ToString("yyyyMMdd-HHmmss")
 $rehearsalRoot = Join-Path $resolvedOutputRoot $rehearsalName
 $requestsRoot = Join-Path $rehearsalRoot "requests"
@@ -96,18 +81,38 @@ function Write-JsonFile {
     $Value | ConvertTo-Json -Depth 20 | Set-Content -Path $Path
 }
 
-$job = Start-Job -ScriptBlock {
-    param(
-        [string]$repoRoot,
-        [string]$auditStorePath,
-        [string]$hostCommand,
-        [string[]]$hostArguments
-    )
+$job = $null
 
-    Set-Location $repoRoot
-    $env:ConnectionStrings__AuditStore = "Data Source=$auditStorePath"
-    & $hostCommand @hostArguments
-} -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments
+if (-not $UseExistingHost) {
+    $publishRoot = Join-Path $repoRoot "artifacts\publish\app"
+    $publishedExe = Join-Path $publishRoot "ClearanceGate.Api.exe"
+    $publishedDll = Join-Path $publishRoot "ClearanceGate.Api.dll"
+
+    if (Test-Path $publishedExe) {
+        $hostCommand = $publishedExe
+        $hostArguments = @("--urls", $BaseUrl)
+    }
+    elseif (Test-Path $publishedDll) {
+        $hostCommand = "dotnet"
+        $hostArguments = @($publishedDll, "--urls", $BaseUrl)
+    }
+    else {
+        throw "Published API host is missing from '$publishRoot'."
+    }
+
+    $job = Start-Job -ScriptBlock {
+        param(
+            [string]$repoRoot,
+            [string]$auditStorePath,
+            [string]$hostCommand,
+            [string[]]$hostArguments
+        )
+
+        Set-Location $repoRoot
+        $env:ConnectionStrings__AuditStore = "Data Source=$auditStorePath"
+        & $hostCommand @hostArguments
+    } -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments
+}
 
 try {
     for ($attempt = 1; $attempt -le 30; $attempt++) {
@@ -197,8 +202,10 @@ try {
         -ProfilesResponsePath (Join-Path $responsesRoot "profiles-response.json") | Out-Null
 }
 finally {
-    Stop-Job $job -ErrorAction SilentlyContinue | Out-Null
-    Remove-Job $job -Force -ErrorAction SilentlyContinue | Out-Null
+    if ($null -ne $job) {
+        Stop-Job $job -ErrorAction SilentlyContinue | Out-Null
+        Remove-Job $job -Force -ErrorAction SilentlyContinue | Out-Null
+    }
 }
 
 $latestEvidence = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\pilot-evidence") -Directory |

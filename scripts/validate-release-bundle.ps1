@@ -51,7 +51,8 @@ $requiredDocs = @(
     "pilot-evidence-package.md",
     "real-caller-intake.md",
     "real-caller-promotion.md",
-    "real-caller-rehearsal.md"
+    "real-caller-rehearsal.md",
+    "near-real-pilot-dry-run.md"
 )
 
 foreach ($doc in $requiredDocs) {

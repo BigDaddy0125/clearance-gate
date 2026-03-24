@@ -91,7 +91,8 @@ $documentsToCopy = @(
     "docs\pilot-evidence-package.md",
     "docs\real-caller-intake.md",
     "docs\real-caller-promotion.md",
-    "docs\real-caller-rehearsal.md"
+    "docs\real-caller-rehearsal.md",
+    "docs\near-real-pilot-dry-run.md"
 )
 
 foreach ($relativePath in $documentsToCopy) {
@@ -140,7 +141,8 @@ $manifest = [ordered]@{
         "docs/pilot-evidence-package.md",
         "docs/real-caller-intake.md",
         "docs/real-caller-promotion.md",
-        "docs/real-caller-rehearsal.md"
+        "docs/real-caller-rehearsal.md",
+        "docs/near-real-pilot-dry-run.md"
     )
     includedExamples = @(
         Get-ChildItem -Path $deploymentExamplesRoot -Filter *.json -File |
