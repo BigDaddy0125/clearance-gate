@@ -41,6 +41,8 @@ Repository layout:
 - `docs/post-pilot-decision-memo.md` template for deciding what happens after the pilot
 - embedded profiles currently include `itops_deployment_v1` and `incident_mitigation_v1`
 - `examples/deployment/appsettings.Production.example.json` minimal deployment config shape
+- `examples/deployment/appsettings.Pilot.example.json` pilot-oriented deployment config shape
+- `examples/deployment/appsettings.LocalValidation.example.json` local validation config shape
 - `examples/pilot-adapter/` narrow caller-side mapping samples
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries
@@ -51,6 +53,7 @@ Repository layout:
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
 - `scripts/prepare-post-pilot-review.ps1` turns a pilot evidence package into a focused post-pilot review directory
 - `scripts/initialize-post-pilot-decision-memo.ps1` generates a decision memo draft from the latest prepared review
+- `scripts/prepare-release-review.ps1` turns the current release bundle into a focused pre-pilot review directory
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 

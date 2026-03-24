@@ -34,6 +34,8 @@ This setting is required. Startup should fail if it is missing or blank.
 Reference example:
 
 - [appsettings.Production.example.json](/C:/work/clearance-gate/examples/deployment/appsettings.Production.example.json)
+- [appsettings.Pilot.example.json](/C:/work/clearance-gate/examples/deployment/appsettings.Pilot.example.json)
+- [appsettings.LocalValidation.example.json](/C:/work/clearance-gate/examples/deployment/appsettings.LocalValidation.example.json)
 
 Example value:
 
@@ -69,7 +71,7 @@ This produces:
 - `artifacts/publish/app`
 - `artifacts/publish/bundle-manifest.json`
 - copied deployment/runbook docs
-- deployment config example
+- deployment config examples
 
 4. Start the API from the bundle:
 
@@ -160,6 +162,23 @@ This produces a timestamped directory under `artifacts/pilot-evidence` containin
 Reference:
 
 - [pilot-evidence-package.md](/C:/work/clearance-gate/docs/pilot-evidence-package.md)
+
+## Release Review Preparation
+
+To prepare a focused release review directory from the current bundle:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\prepare-release-review.ps1
+```
+
+This produces a timestamped directory under `artifacts/release-review` containing:
+
+- the bundle manifest
+- the release-readiness summary
+- deployment and operator docs
+- all deployment config examples
+
+Use this as the pre-pilot review handoff directory.
 
 ## Failure Handling
 

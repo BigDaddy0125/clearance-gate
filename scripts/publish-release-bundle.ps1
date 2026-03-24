@@ -22,9 +22,22 @@ $publishRoot = [System.IO.Path]::GetFullPath($resolvedOutputRoot)
 $appOutput = Join-Path $publishRoot "app"
 $bundleDocs = Join-Path $publishRoot "docs"
 $bundleExamples = Join-Path $publishRoot "examples\deployment"
+$deploymentExamplesRoot = Join-Path $repoRoot "examples\deployment"
 
 if (Test-Path $publishRoot) {
-    Remove-Item -Recurse -Force $publishRoot
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+        try {
+            Remove-Item -Recurse -Force $publishRoot
+            break
+        }
+        catch {
+            if ($attempt -eq 5) {
+                throw
+            }
+
+            Start-Sleep -Milliseconds (500 * $attempt)
+        }
+    }
 }
 
 [System.IO.Directory]::CreateDirectory($appOutput) | Out-Null
@@ -77,9 +90,10 @@ foreach ($relativePath in $documentsToCopy) {
     Copy-Item -Path (Join-Path $repoRoot $relativePath) -Destination $bundleDocs
 }
 
-Copy-Item `
-    -Path (Join-Path $repoRoot "examples\deployment\appsettings.Production.example.json") `
-    -Destination $bundleExamples
+Get-ChildItem -Path $deploymentExamplesRoot -Filter *.json -File |
+    ForEach-Object {
+        Copy-Item -Path $_.FullName -Destination $bundleExamples
+    }
 
 $profileNames = Get-ChildItem -Path (Join-Path $repoRoot "src\ClearanceGate.Profiles") -Filter *.json -File |
     Sort-Object Name |
@@ -111,7 +125,9 @@ $manifest = [ordered]@{
         "docs/pilot-evidence-package.md"
     )
     includedExamples = @(
-        "examples/deployment/appsettings.Production.example.json"
+        Get-ChildItem -Path $deploymentExamplesRoot -Filter *.json -File |
+            Sort-Object Name |
+            ForEach-Object { "examples/deployment/" + $_.Name }
     )
 }
 

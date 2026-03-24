@@ -19,7 +19,7 @@ $bundleRoot = [System.IO.Path]::GetFullPath($resolvedBundleRoot)
 $manifestPath = Join-Path $bundleRoot "bundle-manifest.json"
 $appDirectory = Join-Path $bundleRoot "app"
 $docsDirectory = Join-Path $bundleRoot "docs"
-$exampleConfigPath = Join-Path $bundleRoot "examples\deployment\appsettings.Production.example.json"
+$examplesDirectory = Join-Path $bundleRoot "examples\deployment"
 
 if (-not (Test-Path $manifestPath)) {
     throw "Bundle manifest is missing at '$manifestPath'."
@@ -55,12 +55,25 @@ foreach ($doc in $requiredDocs) {
     }
 }
 
-if (-not (Test-Path $exampleConfigPath)) {
-    throw "Deployment config example is missing at '$exampleConfigPath'."
+$requiredExamples = @(
+    "appsettings.LocalValidation.example.json",
+    "appsettings.Pilot.example.json",
+    "appsettings.Production.example.json"
+)
+
+foreach ($example in $requiredExamples) {
+    $examplePath = Join-Path $examplesDirectory $example
+    if (-not (Test-Path $examplePath)) {
+        throw "Deployment config example is missing at '$examplePath'."
+    }
 }
 
 if ($null -eq $manifest.embeddedProfiles -or $manifest.embeddedProfiles.Count -eq 0) {
     throw "Bundle manifest must declare at least one embedded profile."
+}
+
+if ($null -eq $manifest.includedExamples -or $manifest.includedExamples.Count -lt $requiredExamples.Count) {
+    throw "Bundle manifest must declare the deployment examples included in the bundle."
 }
 
 Write-Host ("Validated release bundle at " + $bundleRoot)
