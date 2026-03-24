@@ -29,7 +29,8 @@ $examplesRoot = Join-Path $reviewRoot "examples\pilot-adapter"
 $docsToCopy = @(
     "docs\caller-onboarding-checklist.md",
     "docs\pilot-adapter-example.md",
-    "docs\pilot-adapter-checklist.md"
+    "docs\pilot-adapter-checklist.md",
+    "docs\real-caller-rehearsal.md"
 )
 
 foreach ($relativePath in $docsToCopy) {
@@ -47,7 +48,8 @@ $reviewManifest = [ordered]@{
     docs = @(
         "docs/caller-onboarding-checklist.md",
         "docs/pilot-adapter-example.md",
-        "docs/pilot-adapter-checklist.md"
+        "docs/pilot-adapter-checklist.md",
+        "docs/real-caller-rehearsal.md"
     )
     examples = @(
         Get-ChildItem -Path $examplesRoot -File |

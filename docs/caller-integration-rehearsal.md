@@ -39,6 +39,19 @@ This will:
 - package pilot evidence
 - prepare caller integration review material
 
+To run against caller-owned payloads that match the maintained adapter shape, pass:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-caller-integration-rehearsal.ps1 `
+  -AuthorizeInputPath .\path\to\caller-authorize.json `
+  -AcknowledgeInputPath .\path\to\caller-acknowledge.json `
+  -Profile itops_deployment_v1
+```
+
+Reference:
+
+- [real-caller-rehearsal.md](/C:/work/clearance-gate/docs/real-caller-rehearsal.md)
+
 ## Success Rule
 
 The rehearsal is acceptable only if:

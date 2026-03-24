@@ -58,6 +58,15 @@ And confirm:
 - the acknowledge mapping matches the maintained example output
 - the caller integration review directory can be prepared
 
+If the caller wants to rehearse with caller-owned payloads that preserve the same field shape, also run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-real-caller-rehearsal-input.ps1 `
+  -AuthorizeInputPath .\path\to\caller-authorize.json `
+  -AcknowledgeInputPath .\path\to\caller-acknowledge.json `
+  -Profile itops_deployment_v1
+```
+
 ## Handoff Rule
 
 The adapter is acceptable for pilot use only if:

@@ -3,7 +3,9 @@ param(
     [string]$BaseUrl = "http://127.0.0.1:5082",
     [string]$OutputRoot = "",
     [string]$AuditStorePath = "",
-    [string]$Profile = "itops_deployment_v1"
+    [string]$Profile = "itops_deployment_v1",
+    [string]$AuthorizeInputPath = "",
+    [string]$AcknowledgeInputPath = ""
 )
 
 Set-StrictMode -Version Latest
@@ -12,6 +14,22 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $adapterRoot = Join-Path $repoRoot "examples\pilot-adapter"
 $converterPath = Join-Path $adapterRoot "convert-change-control-example.ps1"
+
+$resolvedAuthorizeInputPath =
+    if ([string]::IsNullOrWhiteSpace($AuthorizeInputPath)) {
+        Join-Path $adapterRoot "change-control-request.json"
+    }
+    else {
+        $AuthorizeInputPath
+    }
+
+$resolvedAcknowledgeInputPath =
+    if ([string]::IsNullOrWhiteSpace($AcknowledgeInputPath)) {
+        Join-Path $adapterRoot "change-control-ack.json"
+    }
+    else {
+        $AcknowledgeInputPath
+    }
 
 $resolvedOutputRoot =
     if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
@@ -31,6 +49,10 @@ $resolvedAuditStorePath =
 
 & (Join-Path $repoRoot "scripts\validate-release-bundle.ps1") | Out-Null
 & (Join-Path $repoRoot "scripts\validate-pilot-adapter-example.ps1") -Profile $Profile | Out-Null
+& (Join-Path $repoRoot "scripts\validate-real-caller-rehearsal-input.ps1") `
+    -AuthorizeInputPath $resolvedAuthorizeInputPath `
+    -AcknowledgeInputPath $resolvedAcknowledgeInputPath `
+    -Profile $Profile | Out-Null
 & (Join-Path $repoRoot "scripts\prepare-caller-integration-review.ps1") | Out-Null
 
 $publishRoot = Join-Path $repoRoot "artifacts\publish\app"
@@ -101,25 +123,31 @@ try {
         }
     }
 
-    $callerAuthorize = Get-Content -Raw -Path (Join-Path $adapterRoot "change-control-request.json") | ConvertFrom-Json
+    $callerAuthorize = Get-Content -Raw -Path $resolvedAuthorizeInputPath | ConvertFrom-Json
     $callerAuthorize.ticketId = $requestId
     $callerAuthorize.executionId = $decisionId
     $callerAuthorize.source.recordedAt = $authorizeTimestamp
     Write-JsonFile -Path (Join-Path $requestsRoot "caller-authorize-request.json") -Value $callerAuthorize
 
-    $callerAcknowledge = Get-Content -Raw -Path (Join-Path $adapterRoot "change-control-ack.json") | ConvertFrom-Json
+    $callerAcknowledge = Get-Content -Raw -Path $resolvedAcknowledgeInputPath | ConvertFrom-Json
     $callerAcknowledge.executionId = $decisionId
     $callerAcknowledge.authority.recordedAt = $ackTimestamp
     Write-JsonFile -Path (Join-Path $requestsRoot "caller-acknowledge-request.json") -Value $callerAcknowledge
 
-    $authorizeMapped = & $converterPath -Mode authorize -Profile $Profile | ConvertFrom-Json
+    $authorizeMapped = & $converterPath `
+        -Mode authorize `
+        -Profile $Profile `
+        -AuthorizeInputPath (Join-Path $requestsRoot "caller-authorize-request.json") | ConvertFrom-Json
     $authorizeMapped.requestId = $requestId
     $authorizeMapped.decisionId = $decisionId
     $authorizeMapped.profile = $Profile
     $authorizeMapped.metadata.timestamp = $authorizeTimestamp
     Write-JsonFile -Path (Join-Path $requestsRoot "mapped-authorize-request.json") -Value $authorizeMapped
 
-    $ackMapped = & $converterPath -Mode acknowledge -Profile $Profile | ConvertFrom-Json
+    $ackMapped = & $converterPath `
+        -Mode acknowledge `
+        -Profile $Profile `
+        -AcknowledgeInputPath (Join-Path $requestsRoot "caller-acknowledge-request.json") | ConvertFrom-Json
     $ackMapped.decisionId = $decisionId
     $ackMapped.acknowledgment.timestamp = $ackTimestamp
     Write-JsonFile -Path (Join-Path $requestsRoot "mapped-acknowledge-request.json") -Value $ackMapped
@@ -188,6 +216,8 @@ $rehearsalManifest = [ordered]@{
     requestId = $requestId
     decisionId = $decisionId
     auditStorePath = $resolvedAuditStorePath
+    authorizeInputPath = $resolvedAuthorizeInputPath
+    acknowledgeInputPath = $resolvedAcknowledgeInputPath
     pilotEvidenceRoot = if ($null -eq $latestEvidence) { "" } else { $latestEvidence.FullName }
     callerIntegrationReviewRoot = if ($null -eq $latestCallerReview) { "" } else { $latestCallerReview.FullName }
 }

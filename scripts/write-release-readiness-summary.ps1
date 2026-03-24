@@ -61,6 +61,9 @@ $pilotEvidencePackagingScriptPath = Join-Path $repoRoot "scripts\\package-pilot-
 $pilotSessionCaptureScriptPath = Join-Path $repoRoot "scripts\\capture-pilot-sample-session.ps1"
 $controlledPilotDryRunScriptPath = Join-Path $repoRoot "scripts\\run-controlled-pilot-dry-run.ps1"
 $callerIntegrationRehearsalScriptPath = Join-Path $repoRoot "scripts\\run-caller-integration-rehearsal.ps1"
+$realCallerRehearsalGuidePath = Join-Path $repoRoot "docs\\real-caller-rehearsal.md"
+$realCallerValidationScriptPath = Join-Path $repoRoot "scripts\\validate-real-caller-rehearsal-input.ps1"
+$realCallerPreparationScriptPath = Join-Path $repoRoot "scripts\\prepare-real-caller-rehearsal.ps1"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
@@ -74,19 +77,29 @@ $pilotEvidencePackagingScriptStatus = if (Test-Path $pilotEvidencePackagingScrip
 $pilotSessionCaptureScriptStatus = if (Test-Path $pilotSessionCaptureScriptPath) { "PRESENT" } else { "MISSING" }
 $controlledPilotDryRunScriptStatus = if (Test-Path $controlledPilotDryRunScriptPath) { "PRESENT" } else { "MISSING" }
 $callerIntegrationRehearsalScriptStatus = if (Test-Path $callerIntegrationRehearsalScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerRehearsalGuideStatus = if (Test-Path $realCallerRehearsalGuidePath) { "PRESENT" } else { "MISSING" }
+$realCallerValidationScriptStatus = if (Test-Path $realCallerValidationScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerPreparationScriptStatus = if (Test-Path $realCallerPreparationScriptPath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
+$bundleManifestPath = Join-Path $releaseBundleRoot "bundle-manifest.json"
 try {
     & (Join-Path $repoRoot "scripts\\validate-release-bundle.ps1") -BundleRoot $releaseBundleRoot | Out-Null
-    $bundleStatus = "PASS"
-    $bundleManifestPath = Join-Path $releaseBundleRoot "bundle-manifest.json"
-    $bundleManifest = Get-Content -Raw -Path $bundleManifestPath | ConvertFrom-Json
+
+    if (-not (Test-Path $bundleManifestPath)) {
+        throw "Bundle manifest is missing at '$bundleManifestPath'."
+    }
+
+    $bundleManifest = Get-Content -Raw -Path $bundleManifestPath -ErrorAction Stop | ConvertFrom-Json
     $bundleCommit = [string]$bundleManifest.commit
     $bundleProfiles = ((@($bundleManifest.embeddedProfiles) | Sort-Object) -join ", ")
+    $bundleStatus = "PASS"
 }
 catch {
     $bundleStatus = "FAIL"
+    $bundleCommit = "N/A"
+    $bundleProfiles = "N/A"
 }
 
 $summaryLines = @(
@@ -113,6 +126,9 @@ $summaryLines = @(
     "| Pilot Session Capture Script | $pilotSessionCaptureScriptStatus | scripts/capture-pilot-sample-session.ps1 |",
     "| Controlled Pilot Dry-Run Script | $controlledPilotDryRunScriptStatus | scripts/run-controlled-pilot-dry-run.ps1 |",
     "| Caller Integration Rehearsal Script | $callerIntegrationRehearsalScriptStatus | scripts/run-caller-integration-rehearsal.ps1 |",
+    "| Real Caller Rehearsal Guide | $realCallerRehearsalGuideStatus | docs/real-caller-rehearsal.md |",
+    "| Real Caller Input Validation | $realCallerValidationScriptStatus | scripts/validate-real-caller-rehearsal-input.ps1 |",
+    "| Real Caller Rehearsal Prep | $realCallerPreparationScriptStatus | scripts/prepare-real-caller-rehearsal.ps1 |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 

@@ -10,8 +10,11 @@ $requiredPaths = @(
     "docs/caller-onboarding-checklist.md",
     "docs/pilot-adapter-example.md",
     "docs/pilot-adapter-checklist.md",
+    "docs/real-caller-rehearsal.md",
     "scripts/validate-pilot-adapter-example.ps1",
+    "scripts/validate-real-caller-rehearsal-input.ps1",
     "scripts/prepare-caller-integration-review.ps1",
+    "scripts/prepare-real-caller-rehearsal.ps1",
     "scripts/run-caller-integration-rehearsal.ps1",
     "examples/pilot-adapter/change-control-request.json",
     "examples/pilot-adapter/change-control-ack.json",
@@ -31,6 +34,8 @@ $readmeText = Get-Content -Raw -Path (Join-Path $repoRoot "README.md")
 $requiredReadmeMentions = @(
     "docs/pilot-adapter-checklist.md",
     "scripts/validate-pilot-adapter-example.ps1",
+    "scripts/validate-real-caller-rehearsal-input.ps1",
+    "scripts/prepare-real-caller-rehearsal.ps1",
     "scripts/prepare-caller-integration-review.ps1",
     "scripts/run-caller-integration-rehearsal.ps1"
 )

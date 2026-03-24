@@ -65,7 +65,9 @@ Verify:
 
 - `scripts/check-caller-integration-handoff.ps1` passes
 - `scripts/validate-pilot-adapter-example.ps1` passes
+- `scripts/validate-real-caller-rehearsal-input.ps1` is present and usable for caller-owned payloads
 - `scripts/prepare-caller-integration-review.ps1` succeeds
+- `scripts/prepare-real-caller-rehearsal.ps1` is present and usable
 - `scripts/run-caller-integration-rehearsal.ps1` is present and usable
 
 ## Runtime Gate

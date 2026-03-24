@@ -39,6 +39,7 @@ Repository layout:
 - `docs/pilot-adapter-example.md` one narrow caller-side mapping example for the current pilot
 - `docs/pilot-adapter-checklist.md` checklist for adopting the maintained pilot adapter pattern
 - `docs/caller-integration-rehearsal.md` live rehearsal path for the maintained caller adapter against a real ClearanceGate instance
+- `docs/real-caller-rehearsal.md` path for validating and rehearsing caller-owned payloads that preserve the maintained adapter shape
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
@@ -65,7 +66,9 @@ Repository layout:
 - `scripts/prepare-release-review.ps1` turns the current release bundle into a focused pre-pilot review directory
 - `scripts/check-controlled-pilot-readiness.ps1` repository-backed completeness check for the final controlled-pilot assets
 - `scripts/validate-pilot-adapter-example.ps1` verifies the maintained pilot adapter conversion stays deterministic
+- `scripts/validate-real-caller-rehearsal-input.ps1` validates caller-owned payloads before a live rehearsal
 - `scripts/prepare-caller-integration-review.ps1` prepares a focused caller-side integration handoff directory
+- `scripts/prepare-real-caller-rehearsal.ps1` prepares a focused review directory for caller-owned payload rehearsal inputs
 - `scripts/check-caller-integration-handoff.ps1` repository-backed completeness check for the pilot adapter handoff assets
 - `scripts/run-caller-integration-rehearsal.ps1` runs the maintained caller adapter against a live local ClearanceGate instance and captures the resulting evidence
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
