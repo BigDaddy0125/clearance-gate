@@ -38,6 +38,7 @@ Repository layout:
 - `docs/pilot-evidence-package.md` minimum archival package for a pilot session
 - `docs/pilot-adapter-example.md` one narrow caller-side mapping example for the current pilot
 - `docs/pilot-adapter-checklist.md` checklist for adopting the maintained pilot adapter pattern
+- `docs/caller-integration-rehearsal.md` live rehearsal path for the maintained caller adapter against a real ClearanceGate instance
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
@@ -66,6 +67,7 @@ Repository layout:
 - `scripts/validate-pilot-adapter-example.ps1` verifies the maintained pilot adapter conversion stays deterministic
 - `scripts/prepare-caller-integration-review.ps1` prepares a focused caller-side integration handoff directory
 - `scripts/check-caller-integration-handoff.ps1` repository-backed completeness check for the pilot adapter handoff assets
+- `scripts/run-caller-integration-rehearsal.ps1` runs the maintained caller adapter against a live local ClearanceGate instance and captures the resulting evidence
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 

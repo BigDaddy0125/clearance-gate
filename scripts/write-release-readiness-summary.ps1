@@ -60,6 +60,7 @@ $pilotEvidencePackageGuidePath = Join-Path $repoRoot "docs\\pilot-evidence-packa
 $pilotEvidencePackagingScriptPath = Join-Path $repoRoot "scripts\\package-pilot-evidence.ps1"
 $pilotSessionCaptureScriptPath = Join-Path $repoRoot "scripts\\capture-pilot-sample-session.ps1"
 $controlledPilotDryRunScriptPath = Join-Path $repoRoot "scripts\\run-controlled-pilot-dry-run.ps1"
+$callerIntegrationRehearsalScriptPath = Join-Path $repoRoot "scripts\\run-caller-integration-rehearsal.ps1"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
@@ -72,6 +73,7 @@ $pilotEvidencePackageGuideStatus = if (Test-Path $pilotEvidencePackageGuidePath)
 $pilotEvidencePackagingScriptStatus = if (Test-Path $pilotEvidencePackagingScriptPath) { "PRESENT" } else { "MISSING" }
 $pilotSessionCaptureScriptStatus = if (Test-Path $pilotSessionCaptureScriptPath) { "PRESENT" } else { "MISSING" }
 $controlledPilotDryRunScriptStatus = if (Test-Path $controlledPilotDryRunScriptPath) { "PRESENT" } else { "MISSING" }
+$callerIntegrationRehearsalScriptStatus = if (Test-Path $callerIntegrationRehearsalScriptPath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
@@ -110,6 +112,7 @@ $summaryLines = @(
     "| Pilot Evidence Script | $pilotEvidencePackagingScriptStatus | scripts/package-pilot-evidence.ps1 |",
     "| Pilot Session Capture Script | $pilotSessionCaptureScriptStatus | scripts/capture-pilot-sample-session.ps1 |",
     "| Controlled Pilot Dry-Run Script | $controlledPilotDryRunScriptStatus | scripts/run-controlled-pilot-dry-run.ps1 |",
+    "| Caller Integration Rehearsal Script | $callerIntegrationRehearsalScriptStatus | scripts/run-caller-integration-rehearsal.ps1 |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 

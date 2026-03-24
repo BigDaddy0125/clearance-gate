@@ -12,6 +12,7 @@ $requiredPaths = @(
     "docs/pilot-adapter-checklist.md",
     "scripts/validate-pilot-adapter-example.ps1",
     "scripts/prepare-caller-integration-review.ps1",
+    "scripts/run-caller-integration-rehearsal.ps1",
     "examples/pilot-adapter/change-control-request.json",
     "examples/pilot-adapter/change-control-ack.json",
     "examples/pilot-adapter/mapped-authorize-request.json",
@@ -30,7 +31,8 @@ $readmeText = Get-Content -Raw -Path (Join-Path $repoRoot "README.md")
 $requiredReadmeMentions = @(
     "docs/pilot-adapter-checklist.md",
     "scripts/validate-pilot-adapter-example.ps1",
-    "scripts/prepare-caller-integration-review.ps1"
+    "scripts/prepare-caller-integration-review.ps1",
+    "scripts/run-caller-integration-rehearsal.ps1"
 )
 
 foreach ($mention in $requiredReadmeMentions) {
