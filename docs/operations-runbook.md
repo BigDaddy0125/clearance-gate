@@ -92,3 +92,4 @@ Useful fields to preserve in operators' log pipelines:
 Reference:
 
 - [observability-contract.md](/C:/work/clearance-gate/docs/observability-contract.md)
+- [operator-logging-guide.md](/C:/work/clearance-gate/docs/operator-logging-guide.md)

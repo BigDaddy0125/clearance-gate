@@ -77,6 +77,7 @@ The GitHub Actions workflow should publish:
 - traceability pass/fail
 - runtime claim summary
 - TLC summary
+- release bundle status, commit, and embedded profile list
 - uploaded runtime and TLC artifacts
 
 Primary anchor:

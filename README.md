@@ -22,6 +22,7 @@ Repository layout:
 - `docs/` product, architecture, and formal verification strategy
 - `docs/operations-runbook.md` startup, schema, and verification runbook
 - `docs/observability-contract.md` stable event ids and structured logging contract
+- `docs/operator-logging-guide.md` operator-focused guide for triaging current boundary events
 - `docs/profile-lifecycle.md` profile naming, versioning, and fail-closed lifecycle rules
 - `docs/release-readiness.md` current release gate checklist
 - `docs/v0-scope.md` v0 pilot scope and completion definition
