@@ -29,7 +29,9 @@ Repository layout:
 - `docs/api-examples.md` pilot-facing request, response, and diagnostics examples
 - `docs/deployment-runbook.md` concrete deployment and smoke-flow steps
 - `docs/pilot-acceptance-checklist.md` pilot entry, success, and stop criteria
+- `docs/pilot-execution-checklist.md` operator checklist for the actual pilot execution window
 - `docs/pilot-sample-session.md` one complete step-by-step pilot session
+- `docs/pilot-incident-response.md` minimum response guide when the pilot boundary appears unhealthy
 - `docs/pilot-adapter-example.md` one narrow caller-side mapping example for the current pilot
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary

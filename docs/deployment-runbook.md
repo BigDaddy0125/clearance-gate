@@ -116,12 +116,27 @@ Reference:
 - [api-examples.md](/C:/work/clearance-gate/docs/api-examples.md)
 - [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1)
 - [publish-release-bundle.ps1](/C:/work/clearance-gate/scripts/publish-release-bundle.ps1)
+- [pilot-execution-checklist.md](/C:/work/clearance-gate/docs/pilot-execution-checklist.md)
 
 Example:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\run-deployment-smoke-check.ps1
 ```
+
+## Smoke-Check to Evidence Rule
+
+Do not treat the smoke-check as complete just because the script returns success.
+
+Also preserve:
+
+- the returned `requestId`
+- the returned `decisionId`
+- the returned `evidenceId`
+- the compact audit view
+- the export audit view
+
+Use the smoke-check as a bridge from deployment verification to durable evidence verification.
 
 ## Failure Handling
 
@@ -135,6 +150,7 @@ If runtime smoke flow fails:
 
 - stop the pilot rollout
 - preserve the database file and logs
+- preserve the smoke-check request and resulting identifiers
 - confirm claim traceability and runtime tests locally before retrying
 
 ## Upgrade Rule

@@ -78,6 +78,7 @@ The GitHub Actions workflow should publish:
 - runtime claim summary
 - TLC summary
 - release bundle status, commit, and embedded profile list
+- pilot-execution support anchors
 - uploaded runtime and TLC artifacts
 
 Primary anchor:
@@ -92,6 +93,16 @@ Verify:
 - `powershell -ExecutionPolicy Bypass -File .\scripts\validate-release-bundle.ps1` succeeds
 - the release bundle includes `bundle-manifest.json`
 - the bundle includes deployment docs and `appsettings.Production.example.json`
+
+## Pilot Execution Gate
+
+Verify:
+
+- [run-deployment-smoke-check.ps1](/C:/work/clearance-gate/scripts/run-deployment-smoke-check.ps1) is present and usable
+- [operator-logging-guide.md](/C:/work/clearance-gate/docs/operator-logging-guide.md) is current
+- [caller-onboarding-checklist.md](/C:/work/clearance-gate/docs/caller-onboarding-checklist.md) is current
+- [pilot-execution-checklist.md](/C:/work/clearance-gate/docs/pilot-execution-checklist.md) is current
+- [pilot-incident-response.md](/C:/work/clearance-gate/docs/pilot-incident-response.md) is current
 
 ## Minimal Approval Rule
 

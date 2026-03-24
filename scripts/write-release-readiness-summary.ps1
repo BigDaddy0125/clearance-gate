@@ -27,9 +27,19 @@ catch {
 $latestRuntimeSummary = Join-Path $repoRoot "artifacts\\test-results\\summary.md"
 $latestTlcSummary = Join-Path $repoRoot "artifacts\\tlc\\summary.md"
 $releaseBundleRoot = Join-Path $repoRoot "artifacts\\publish"
+$pilotSmokeCheckPath = Join-Path $repoRoot "scripts\\run-deployment-smoke-check.ps1"
+$operatorLoggingGuidePath = Join-Path $repoRoot "docs\\operator-logging-guide.md"
+$callerOnboardingGuidePath = Join-Path $repoRoot "docs\\caller-onboarding-checklist.md"
+$pilotExecutionChecklistPath = Join-Path $repoRoot "docs\\pilot-execution-checklist.md"
+$pilotIncidentResponsePath = Join-Path $repoRoot "docs\\pilot-incident-response.md"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
+$pilotSmokeCheckStatus = if (Test-Path $pilotSmokeCheckPath) { "PRESENT" } else { "MISSING" }
+$operatorLoggingGuideStatus = if (Test-Path $operatorLoggingGuidePath) { "PRESENT" } else { "MISSING" }
+$callerOnboardingGuideStatus = if (Test-Path $callerOnboardingGuidePath) { "PRESENT" } else { "MISSING" }
+$pilotExecutionChecklistStatus = if (Test-Path $pilotExecutionChecklistPath) { "PRESENT" } else { "MISSING" }
+$pilotIncidentResponseStatus = if (Test-Path $pilotIncidentResponsePath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
@@ -56,6 +66,11 @@ $summaryLines = @(
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",
     "| Bundle Commit | $bundleCommit | artifacts/publish/bundle-manifest.json |",
     "| Bundle Profiles | $bundleProfiles | artifacts/publish/bundle-manifest.json |",
+    "| Pilot Smoke Check | $pilotSmokeCheckStatus | scripts/run-deployment-smoke-check.ps1 |",
+    "| Operator Logging Guide | $operatorLoggingGuideStatus | docs/operator-logging-guide.md |",
+    "| Caller Onboarding Guide | $callerOnboardingGuideStatus | docs/caller-onboarding-checklist.md |",
+    "| Pilot Execution Checklist | $pilotExecutionChecklistStatus | docs/pilot-execution-checklist.md |",
+    "| Pilot Incident Response | $pilotIncidentResponseStatus | docs/pilot-incident-response.md |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 
