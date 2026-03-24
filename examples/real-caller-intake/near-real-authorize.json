@@ -1,0 +1,19 @@
+{
+  "ticketId": "CHG-2026-03-24-001",
+  "executionId": "deploy-prod-payments-api-20260324-01",
+  "operation": {
+    "kind": "deploy",
+    "summary": "Deploy payments-api 2026.03.24.1 to production"
+  },
+  "changeWindow": "standard-production-window",
+  "riskIndicators": [
+    "HIGH_IMPACT"
+  ],
+  "requester": {
+    "id": "svc-release-manager"
+  },
+  "source": {
+    "system": "release-control",
+    "recordedAt": "2026-03-24T07:45:00Z"
+  }
+}
