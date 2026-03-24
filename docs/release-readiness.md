@@ -49,6 +49,15 @@ Verify:
 - operator, deployment, pilot, and review handoff assets remain present
 - README entry points remain current for those assets
 
+## Controlled Pilot Gate
+
+Verify:
+
+- `scripts/check-controlled-pilot-readiness.ps1` passes
+- the dry-run checklist is current
+- the rollback note is current
+- the pilot rollout preparation script is present and usable
+
 ## Runtime Gate
 
 Verify:

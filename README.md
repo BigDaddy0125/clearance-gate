@@ -31,6 +31,8 @@ Repository layout:
 - `docs/deployment-runbook.md` concrete deployment and smoke-flow steps
 - `docs/pilot-acceptance-checklist.md` pilot entry, success, and stop criteria
 - `docs/pilot-execution-checklist.md` operator checklist for the actual pilot execution window
+- `docs/pilot-dry-run-checklist.md` final rehearsal checklist before the first controlled pilot rollout
+- `docs/pilot-rollback-note.md` narrow rollback rule for the controlled pilot
 - `docs/pilot-sample-session.md` one complete step-by-step pilot session
 - `docs/pilot-incident-response.md` minimum response guide when the pilot boundary appears unhealthy
 - `docs/pilot-evidence-package.md` minimum archival package for a pilot session
@@ -52,11 +54,13 @@ Repository layout:
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/check-delivery-handoff.ps1` repository-backed completeness check for delivery, pilot, and review handoff assets
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
+- `scripts/prepare-pilot-rollout.ps1` prepares the final controlled-pilot handoff directory from the latest release review
 - `scripts/capture-pilot-sample-session.ps1` runs the sample path with unique ids and packages the resulting evidence
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
 - `scripts/prepare-post-pilot-review.ps1` turns a pilot evidence package into a focused post-pilot review directory
 - `scripts/initialize-post-pilot-decision-memo.ps1` generates a decision memo draft from the latest prepared review
 - `scripts/prepare-release-review.ps1` turns the current release bundle into a focused pre-pilot review directory
+- `scripts/check-controlled-pilot-readiness.ps1` repository-backed completeness check for the final controlled-pilot assets
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 
