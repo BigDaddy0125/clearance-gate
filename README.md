@@ -43,6 +43,7 @@ Repository layout:
 - `docs/real-caller-promotion.md` promotion path from a completed intake package into rehearsal-ready review material
 - `docs/real-caller-rehearsal.md` path for validating and rehearsing caller-owned payloads that preserve the maintained adapter shape
 - `docs/near-real-pilot-dry-run.md` one full dry-run path that starts from the maintained near-real caller payloads
+- `docs/real-caller-substitution.md` direct substitution path from caller-owned payload files into intake, promotion, and rehearsal preparation
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
@@ -80,6 +81,7 @@ Repository layout:
 - `scripts/promote-real-caller-intake.ps1` turns one completed intake package into a rehearsal-ready promotion artifact
 - `scripts/validate-real-caller-rehearsal-input.ps1` validates caller-owned payloads before a live rehearsal
 - `scripts/run-near-real-pilot-dry-run.ps1` executes one full dry-run from the maintained near-real caller payloads through evidence and post-pilot review
+- `scripts/prepare-real-caller-substitution.ps1` turns caller-owned payload files into a validated intake and promotion package with the next rehearsal command
 - `scripts/prepare-caller-integration-review.ps1` prepares a focused caller-side integration handoff directory
 - `scripts/prepare-real-caller-rehearsal.ps1` prepares a focused review directory for caller-owned payload rehearsal inputs
 - `scripts/check-caller-integration-handoff.ps1` repository-backed completeness check for the pilot adapter handoff assets

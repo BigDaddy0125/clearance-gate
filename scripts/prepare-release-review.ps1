@@ -57,7 +57,8 @@ $docsToCopy = @(
     "real-caller-intake.md",
     "real-caller-promotion.md",
     "real-caller-rehearsal.md",
-    "near-real-pilot-dry-run.md"
+    "near-real-pilot-dry-run.md",
+    "real-caller-substitution.md"
 )
 
 foreach ($doc in $docsToCopy) {

@@ -65,6 +65,14 @@ catch {
 }
 
 try {
+    & (Join-Path $repoRoot "scripts\\check-real-caller-substitution-handoff.ps1") | Out-Null
+    $realCallerSubstitutionStatus = "PASS"
+}
+catch {
+    $realCallerSubstitutionStatus = "FAIL"
+}
+
+try {
     & (Join-Path $repoRoot "scripts\\check-claim-traceability.ps1") | Out-Null
     $traceabilityStatus = "PASS"
 }
@@ -96,6 +104,8 @@ $realCallerValidationScriptPath = Join-Path $repoRoot "scripts\\validate-real-ca
 $realCallerPreparationScriptPath = Join-Path $repoRoot "scripts\\prepare-real-caller-rehearsal.ps1"
 $nearRealPilotGuidePath = Join-Path $repoRoot "docs\\near-real-pilot-dry-run.md"
 $nearRealPilotScriptPath = Join-Path $repoRoot "scripts\\run-near-real-pilot-dry-run.ps1"
+$realCallerSubstitutionGuidePath = Join-Path $repoRoot "docs\\real-caller-substitution.md"
+$realCallerSubstitutionScriptPath = Join-Path $repoRoot "scripts\\prepare-real-caller-substitution.ps1"
 
 $runtimeStatus = if (Test-Path $latestRuntimeSummary) { "PRESENT" } else { "MISSING" }
 $tlcStatus = if (Test-Path $latestTlcSummary) { "PRESENT" } else { "MISSING" }
@@ -120,6 +130,8 @@ $realCallerValidationScriptStatus = if (Test-Path $realCallerValidationScriptPat
 $realCallerPreparationScriptStatus = if (Test-Path $realCallerPreparationScriptPath) { "PRESENT" } else { "MISSING" }
 $nearRealPilotGuideStatus = if (Test-Path $nearRealPilotGuidePath) { "PRESENT" } else { "MISSING" }
 $nearRealPilotScriptStatus = if (Test-Path $nearRealPilotScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerSubstitutionGuideStatus = if (Test-Path $realCallerSubstitutionGuidePath) { "PRESENT" } else { "MISSING" }
+$realCallerSubstitutionScriptStatus = if (Test-Path $realCallerSubstitutionScriptPath) { "PRESENT" } else { "MISSING" }
 $bundleStatus = "UNKNOWN"
 $bundleCommit = "N/A"
 $bundleProfiles = "N/A"
@@ -154,6 +166,7 @@ $summaryLines = @(
     "| Real Caller Intake | $realCallerIntakeStatus | scripts/check-real-caller-intake-handoff.ps1 |",
     "| Real Caller Promotion | $realCallerPromotionStatus | scripts/check-real-caller-promotion-handoff.ps1 |",
     "| Near-Real Pilot | $nearRealPilotStatus | scripts/check-near-real-pilot-handoff.ps1 |",
+    "| Real Caller Substitution | $realCallerSubstitutionStatus | scripts/check-real-caller-substitution-handoff.ps1 |",
     "| Runtime Claim Summary | $runtimeStatus | artifacts/test-results/summary.md |",
     "| TLC Summary | $tlcStatus | artifacts/tlc/summary.md |",
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",
@@ -180,6 +193,8 @@ $summaryLines = @(
     "| Real Caller Rehearsal Prep | $realCallerPreparationScriptStatus | scripts/prepare-real-caller-rehearsal.ps1 |",
     "| Near-Real Pilot Guide | $nearRealPilotGuideStatus | docs/near-real-pilot-dry-run.md |",
     "| Near-Real Pilot Script | $nearRealPilotScriptStatus | scripts/run-near-real-pilot-dry-run.ps1 |",
+    "| Real Caller Substitution Guide | $realCallerSubstitutionGuideStatus | docs/real-caller-substitution.md |",
+    "| Real Caller Substitution Script | $realCallerSubstitutionScriptStatus | scripts/prepare-real-caller-substitution.ps1 |",
     "| Release Checklist | PRESENT | docs/release-readiness.md |"
 )
 

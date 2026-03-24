@@ -61,6 +61,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-near-real-pilot-handoff.ps1
 
+      - name: Check real caller substitution handoff assets
+        shell: pwsh
+        run: .\scripts\check-real-caller-substitution-handoff.ps1
+
       - name: Generate profile TLC configs
         shell: pwsh
         run: .\scripts\generate-all-profile-tla-configs.ps1
@@ -121,6 +125,16 @@ jobs:
       - name: Run near-real pilot dry-run
         shell: pwsh
         run: .\scripts\run-near-real-pilot-dry-run.ps1
+
+      - name: Prepare real caller substitution
+        shell: pwsh
+        run: >
+          .\scripts\prepare-real-caller-substitution.ps1
+          -CallerSystem example-caller
+          -ActionDescription "Example gated deployment action"
+          -AuthorizeInputPath .\examples\real-caller-intake\near-real-authorize.json
+          -AcknowledgeInputPath .\examples\real-caller-intake\near-real-acknowledge.json
+          -Profile itops_deployment_v1
 
       - name: TLC green models
         shell: pwsh
@@ -208,3 +222,9 @@ jobs:
         with:
           name: near-real-pilot-dry-run
           path: artifacts/near-real-pilot-dry-run
+
+      - name: Upload real caller substitution artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-caller-substitution
+          path: artifacts/real-caller-substitution

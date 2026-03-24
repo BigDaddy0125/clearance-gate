@@ -67,6 +67,7 @@ Verify:
 - `scripts/check-real-caller-intake-handoff.ps1` passes
 - `scripts/check-real-caller-promotion-handoff.ps1` passes
 - `scripts/check-near-real-pilot-handoff.ps1` passes
+- `scripts/check-real-caller-substitution-handoff.ps1` passes
 - `scripts/initialize-real-caller-intake.ps1` is present and usable
 - `scripts/create-sample-real-caller-intake.ps1` is present and usable
 - `scripts/validate-pilot-adapter-example.ps1` passes
@@ -116,6 +117,7 @@ The GitHub Actions workflow should publish:
 - real caller intake handoff pass/fail
 - real caller promotion handoff pass/fail
 - near-real pilot handoff pass/fail
+- real caller substitution handoff pass/fail
 - runtime claim summary
 - TLC summary
 - release bundle status, commit, and embedded profile list
@@ -124,6 +126,7 @@ The GitHub Actions workflow should publish:
 - real caller intake artifacts
 - real caller promotion artifacts
 - near-real pilot dry-run artifacts
+- real caller substitution artifacts
 - pilot-execution support anchors
 - uploaded runtime and TLC artifacts
 
