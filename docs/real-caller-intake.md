@@ -64,3 +64,8 @@ The intake package is ready to move forward only when:
 - the active profile is explicit
 - the caller agrees to deterministic mapping only
 - the package can move directly into [real-caller-rehearsal.md](/C:/work/clearance-gate/docs/real-caller-rehearsal.md)
+
+Once the package is filled in, validate and promote it through:
+
+- [validate-real-caller-intake-package.ps1](/C:/work/clearance-gate/scripts/validate-real-caller-intake-package.ps1)
+- [real-caller-promotion.md](/C:/work/clearance-gate/docs/real-caller-promotion.md)

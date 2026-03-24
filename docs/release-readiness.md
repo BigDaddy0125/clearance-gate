@@ -65,8 +65,12 @@ Verify:
 
 - `scripts/check-caller-integration-handoff.ps1` passes
 - `scripts/check-real-caller-intake-handoff.ps1` passes
+- `scripts/check-real-caller-promotion-handoff.ps1` passes
 - `scripts/initialize-real-caller-intake.ps1` is present and usable
+- `scripts/create-sample-real-caller-intake.ps1` is present and usable
 - `scripts/validate-pilot-adapter-example.ps1` passes
+- `scripts/validate-real-caller-intake-package.ps1` is present and usable
+- `scripts/promote-real-caller-intake.ps1` is present and usable
 - `scripts/validate-real-caller-rehearsal-input.ps1` is present and usable for caller-owned payloads
 - `scripts/prepare-caller-integration-review.ps1` succeeds
 - `scripts/prepare-real-caller-rehearsal.ps1` is present and usable
@@ -109,11 +113,14 @@ The GitHub Actions workflow should publish:
 - controlled pilot readiness pass/fail
 - caller integration handoff pass/fail
 - real caller intake handoff pass/fail
+- real caller promotion handoff pass/fail
 - runtime claim summary
 - TLC summary
 - release bundle status, commit, and embedded profile list
 - caller integration review artifacts
 - real caller rehearsal artifacts
+- real caller intake artifacts
+- real caller promotion artifacts
 - pilot-execution support anchors
 - uploaded runtime and TLC artifacts
 

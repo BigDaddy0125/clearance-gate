@@ -55,6 +55,7 @@ $docsToCopy = @(
     "api-examples.md",
     "pilot-evidence-package.md",
     "real-caller-intake.md",
+    "real-caller-promotion.md",
     "real-caller-rehearsal.md"
 )
 

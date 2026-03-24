@@ -40,6 +40,7 @@ Repository layout:
 - `docs/pilot-adapter-checklist.md` checklist for adopting the maintained pilot adapter pattern
 - `docs/caller-integration-rehearsal.md` live rehearsal path for the maintained caller adapter against a real ClearanceGate instance
 - `docs/real-caller-intake.md` intake path for collecting caller-owned payloads before a real rehearsal
+- `docs/real-caller-promotion.md` promotion path from a completed intake package into rehearsal-ready review material
 - `docs/real-caller-rehearsal.md` path for validating and rehearsing caller-owned payloads that preserve the maintained adapter shape
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
@@ -68,8 +69,12 @@ Repository layout:
 - `scripts/prepare-release-review.ps1` turns the current release bundle into a focused pre-pilot review directory
 - `scripts/check-controlled-pilot-readiness.ps1` repository-backed completeness check for the final controlled-pilot assets
 - `scripts/initialize-real-caller-intake.ps1` initializes a focused intake package for a real caller before rehearsal
+- `scripts/create-sample-real-caller-intake.ps1` materializes a ready sample intake package for CI and local verification
 - `scripts/validate-pilot-adapter-example.ps1` verifies the maintained pilot adapter conversion stays deterministic
 - `scripts/check-real-caller-intake-handoff.ps1` repository-backed completeness check for real caller intake assets
+- `scripts/check-real-caller-promotion-handoff.ps1` repository-backed completeness check for real caller promotion assets
+- `scripts/validate-real-caller-intake-package.ps1` validates a completed intake package before promotion
+- `scripts/promote-real-caller-intake.ps1` turns one completed intake package into a rehearsal-ready promotion artifact
 - `scripts/validate-real-caller-rehearsal-input.ps1` validates caller-owned payloads before a live rehearsal
 - `scripts/prepare-caller-integration-review.ps1` prepares a focused caller-side integration handoff directory
 - `scripts/prepare-real-caller-rehearsal.ps1` prepares a focused review directory for caller-owned payload rehearsal inputs

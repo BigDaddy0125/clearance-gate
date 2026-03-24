@@ -90,6 +90,7 @@ $documentsToCopy = @(
     "docs\api-examples.md",
     "docs\pilot-evidence-package.md",
     "docs\real-caller-intake.md",
+    "docs\real-caller-promotion.md",
     "docs\real-caller-rehearsal.md"
 )
 
@@ -138,6 +139,7 @@ $manifest = [ordered]@{
         "docs/api-examples.md",
         "docs/pilot-evidence-package.md",
         "docs/real-caller-intake.md",
+        "docs/real-caller-promotion.md",
         "docs/real-caller-rehearsal.md"
     )
     includedExamples = @(

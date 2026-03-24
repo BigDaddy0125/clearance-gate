@@ -49,6 +49,14 @@ catch {
 }
 
 try {
+    & (Join-Path $repoRoot "scripts\\check-real-caller-promotion-handoff.ps1") | Out-Null
+    $realCallerPromotionStatus = "PASS"
+}
+catch {
+    $realCallerPromotionStatus = "FAIL"
+}
+
+try {
     & (Join-Path $repoRoot "scripts\\check-claim-traceability.ps1") | Out-Null
     $traceabilityStatus = "PASS"
 }
@@ -71,6 +79,10 @@ $controlledPilotDryRunScriptPath = Join-Path $repoRoot "scripts\\run-controlled-
 $callerIntegrationRehearsalScriptPath = Join-Path $repoRoot "scripts\\run-caller-integration-rehearsal.ps1"
 $realCallerIntakeGuidePath = Join-Path $repoRoot "docs\\real-caller-intake.md"
 $realCallerIntakeScriptPath = Join-Path $repoRoot "scripts\\initialize-real-caller-intake.ps1"
+$realCallerPromotionGuidePath = Join-Path $repoRoot "docs\\real-caller-promotion.md"
+$realCallerSampleIntakeScriptPath = Join-Path $repoRoot "scripts\\create-sample-real-caller-intake.ps1"
+$realCallerIntakeValidationScriptPath = Join-Path $repoRoot "scripts\\validate-real-caller-intake-package.ps1"
+$realCallerPromotionScriptPath = Join-Path $repoRoot "scripts\\promote-real-caller-intake.ps1"
 $realCallerRehearsalGuidePath = Join-Path $repoRoot "docs\\real-caller-rehearsal.md"
 $realCallerValidationScriptPath = Join-Path $repoRoot "scripts\\validate-real-caller-rehearsal-input.ps1"
 $realCallerPreparationScriptPath = Join-Path $repoRoot "scripts\\prepare-real-caller-rehearsal.ps1"
@@ -89,6 +101,10 @@ $controlledPilotDryRunScriptStatus = if (Test-Path $controlledPilotDryRunScriptP
 $callerIntegrationRehearsalScriptStatus = if (Test-Path $callerIntegrationRehearsalScriptPath) { "PRESENT" } else { "MISSING" }
 $realCallerIntakeGuideStatus = if (Test-Path $realCallerIntakeGuidePath) { "PRESENT" } else { "MISSING" }
 $realCallerIntakeScriptStatus = if (Test-Path $realCallerIntakeScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerPromotionGuideStatus = if (Test-Path $realCallerPromotionGuidePath) { "PRESENT" } else { "MISSING" }
+$realCallerSampleIntakeScriptStatus = if (Test-Path $realCallerSampleIntakeScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerIntakeValidationScriptStatus = if (Test-Path $realCallerIntakeValidationScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerPromotionScriptStatus = if (Test-Path $realCallerPromotionScriptPath) { "PRESENT" } else { "MISSING" }
 $realCallerRehearsalGuideStatus = if (Test-Path $realCallerRehearsalGuidePath) { "PRESENT" } else { "MISSING" }
 $realCallerValidationScriptStatus = if (Test-Path $realCallerValidationScriptPath) { "PRESENT" } else { "MISSING" }
 $realCallerPreparationScriptStatus = if (Test-Path $realCallerPreparationScriptPath) { "PRESENT" } else { "MISSING" }
@@ -124,6 +140,7 @@ $summaryLines = @(
     "| Controlled Pilot | $controlledPilotStatus | scripts/check-controlled-pilot-readiness.ps1 |",
     "| Caller Integration | $callerIntegrationStatus | scripts/check-caller-integration-handoff.ps1 |",
     "| Real Caller Intake | $realCallerIntakeStatus | scripts/check-real-caller-intake-handoff.ps1 |",
+    "| Real Caller Promotion | $realCallerPromotionStatus | scripts/check-real-caller-promotion-handoff.ps1 |",
     "| Runtime Claim Summary | $runtimeStatus | artifacts/test-results/summary.md |",
     "| TLC Summary | $tlcStatus | artifacts/tlc/summary.md |",
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",
@@ -141,6 +158,10 @@ $summaryLines = @(
     "| Caller Integration Rehearsal Script | $callerIntegrationRehearsalScriptStatus | scripts/run-caller-integration-rehearsal.ps1 |",
     "| Real Caller Intake Guide | $realCallerIntakeGuideStatus | docs/real-caller-intake.md |",
     "| Real Caller Intake Script | $realCallerIntakeScriptStatus | scripts/initialize-real-caller-intake.ps1 |",
+    "| Real Caller Promotion Guide | $realCallerPromotionGuideStatus | docs/real-caller-promotion.md |",
+    "| Real Caller Sample Intake Script | $realCallerSampleIntakeScriptStatus | scripts/create-sample-real-caller-intake.ps1 |",
+    "| Real Caller Intake Validation | $realCallerIntakeValidationScriptStatus | scripts/validate-real-caller-intake-package.ps1 |",
+    "| Real Caller Promotion Script | $realCallerPromotionScriptStatus | scripts/promote-real-caller-intake.ps1 |",
     "| Real Caller Rehearsal Guide | $realCallerRehearsalGuideStatus | docs/real-caller-rehearsal.md |",
     "| Real Caller Input Validation | $realCallerValidationScriptStatus | scripts/validate-real-caller-rehearsal-input.ps1 |",
     "| Real Caller Rehearsal Prep | $realCallerPreparationScriptStatus | scripts/prepare-real-caller-rehearsal.ps1 |",

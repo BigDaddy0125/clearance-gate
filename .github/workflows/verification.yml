@@ -53,6 +53,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-real-caller-intake-handoff.ps1
 
+      - name: Check real caller promotion handoff assets
+        shell: pwsh
+        run: .\scripts\check-real-caller-promotion-handoff.ps1
+
       - name: Generate profile TLC configs
         shell: pwsh
         run: .\scripts\generate-all-profile-tla-configs.ps1
@@ -92,6 +96,23 @@ jobs:
           -CallerSystem example-caller
           -Profile itops_deployment_v1
           -ActionDescription "Example gated deployment action"
+
+      - name: Create sample real caller intake
+        shell: pwsh
+        run: .\scripts\create-sample-real-caller-intake.ps1 -Profile itops_deployment_v1
+
+      - name: Validate sample real caller intake
+        shell: pwsh
+        run: >
+          .\scripts\validate-real-caller-intake-package.ps1
+          -IntakeRoot (Get-ChildItem .\artifacts\real-caller-intake -Directory | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1).FullName
+          -RequireReadyStatus
+
+      - name: Promote sample real caller intake
+        shell: pwsh
+        run: >
+          .\scripts\promote-real-caller-intake.ps1
+          -IntakeRoot (Get-ChildItem .\artifacts\real-caller-intake -Directory | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1).FullName
 
       - name: TLC green models
         shell: pwsh
@@ -167,3 +188,9 @@ jobs:
         with:
           name: real-caller-intake
           path: artifacts/real-caller-intake
+
+      - name: Upload real caller promotion artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-caller-promotion
+          path: artifacts/real-caller-promotion
