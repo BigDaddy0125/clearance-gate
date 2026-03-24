@@ -1,0 +1,19 @@
+{
+  "ticketId": "replace-with-stable-logical-request-id",
+  "executionId": "replace-with-decision-attempt-id",
+  "operation": {
+    "kind": "replace-with-action-type",
+    "summary": "replace-with-short-action-summary"
+  },
+  "changeWindow": "replace-with-caller-window-or-context",
+  "riskIndicators": [
+    "replace-with-risk-flag"
+  ],
+  "requester": {
+    "id": "replace-with-owner-id"
+  },
+  "source": {
+    "system": "replace-with-caller-system",
+    "recordedAt": "replace-with-utc-timestamp"
+  }
+}

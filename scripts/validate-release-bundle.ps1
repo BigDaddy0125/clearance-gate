@@ -49,6 +49,7 @@ $requiredDocs = @(
     "operator-triage-cheatsheet.md",
     "api-examples.md",
     "pilot-evidence-package.md",
+    "real-caller-intake.md",
     "real-caller-rehearsal.md"
 )
 

@@ -1,0 +1,11 @@
+{
+  "callerSystem": "replace-with-caller-system",
+  "profile": "replace-with-explicit-profile-id",
+  "actionDescription": "replace-with-gated-action-description",
+  "status": "DRAFT",
+  "notes": [
+    "Confirm deterministic mapping only.",
+    "Do not use profile diagnostics as execution-time substitution.",
+    "Do not auto-acknowledge on behalf of a human authority."
+  ]
+}

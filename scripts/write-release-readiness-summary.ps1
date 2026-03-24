@@ -41,6 +41,14 @@ catch {
 }
 
 try {
+    & (Join-Path $repoRoot "scripts\\check-real-caller-intake-handoff.ps1") | Out-Null
+    $realCallerIntakeStatus = "PASS"
+}
+catch {
+    $realCallerIntakeStatus = "FAIL"
+}
+
+try {
     & (Join-Path $repoRoot "scripts\\check-claim-traceability.ps1") | Out-Null
     $traceabilityStatus = "PASS"
 }
@@ -61,6 +69,8 @@ $pilotEvidencePackagingScriptPath = Join-Path $repoRoot "scripts\\package-pilot-
 $pilotSessionCaptureScriptPath = Join-Path $repoRoot "scripts\\capture-pilot-sample-session.ps1"
 $controlledPilotDryRunScriptPath = Join-Path $repoRoot "scripts\\run-controlled-pilot-dry-run.ps1"
 $callerIntegrationRehearsalScriptPath = Join-Path $repoRoot "scripts\\run-caller-integration-rehearsal.ps1"
+$realCallerIntakeGuidePath = Join-Path $repoRoot "docs\\real-caller-intake.md"
+$realCallerIntakeScriptPath = Join-Path $repoRoot "scripts\\initialize-real-caller-intake.ps1"
 $realCallerRehearsalGuidePath = Join-Path $repoRoot "docs\\real-caller-rehearsal.md"
 $realCallerValidationScriptPath = Join-Path $repoRoot "scripts\\validate-real-caller-rehearsal-input.ps1"
 $realCallerPreparationScriptPath = Join-Path $repoRoot "scripts\\prepare-real-caller-rehearsal.ps1"
@@ -77,6 +87,8 @@ $pilotEvidencePackagingScriptStatus = if (Test-Path $pilotEvidencePackagingScrip
 $pilotSessionCaptureScriptStatus = if (Test-Path $pilotSessionCaptureScriptPath) { "PRESENT" } else { "MISSING" }
 $controlledPilotDryRunScriptStatus = if (Test-Path $controlledPilotDryRunScriptPath) { "PRESENT" } else { "MISSING" }
 $callerIntegrationRehearsalScriptStatus = if (Test-Path $callerIntegrationRehearsalScriptPath) { "PRESENT" } else { "MISSING" }
+$realCallerIntakeGuideStatus = if (Test-Path $realCallerIntakeGuidePath) { "PRESENT" } else { "MISSING" }
+$realCallerIntakeScriptStatus = if (Test-Path $realCallerIntakeScriptPath) { "PRESENT" } else { "MISSING" }
 $realCallerRehearsalGuideStatus = if (Test-Path $realCallerRehearsalGuidePath) { "PRESENT" } else { "MISSING" }
 $realCallerValidationScriptStatus = if (Test-Path $realCallerValidationScriptPath) { "PRESENT" } else { "MISSING" }
 $realCallerPreparationScriptStatus = if (Test-Path $realCallerPreparationScriptPath) { "PRESENT" } else { "MISSING" }
@@ -111,6 +123,7 @@ $summaryLines = @(
     "| Delivery Handoff | $deliveryHandoffStatus | scripts/check-delivery-handoff.ps1 |",
     "| Controlled Pilot | $controlledPilotStatus | scripts/check-controlled-pilot-readiness.ps1 |",
     "| Caller Integration | $callerIntegrationStatus | scripts/check-caller-integration-handoff.ps1 |",
+    "| Real Caller Intake | $realCallerIntakeStatus | scripts/check-real-caller-intake-handoff.ps1 |",
     "| Runtime Claim Summary | $runtimeStatus | artifacts/test-results/summary.md |",
     "| TLC Summary | $tlcStatus | artifacts/tlc/summary.md |",
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",
@@ -126,6 +139,8 @@ $summaryLines = @(
     "| Pilot Session Capture Script | $pilotSessionCaptureScriptStatus | scripts/capture-pilot-sample-session.ps1 |",
     "| Controlled Pilot Dry-Run Script | $controlledPilotDryRunScriptStatus | scripts/run-controlled-pilot-dry-run.ps1 |",
     "| Caller Integration Rehearsal Script | $callerIntegrationRehearsalScriptStatus | scripts/run-caller-integration-rehearsal.ps1 |",
+    "| Real Caller Intake Guide | $realCallerIntakeGuideStatus | docs/real-caller-intake.md |",
+    "| Real Caller Intake Script | $realCallerIntakeScriptStatus | scripts/initialize-real-caller-intake.ps1 |",
     "| Real Caller Rehearsal Guide | $realCallerRehearsalGuideStatus | docs/real-caller-rehearsal.md |",
     "| Real Caller Input Validation | $realCallerValidationScriptStatus | scripts/validate-real-caller-rehearsal-input.ps1 |",
     "| Real Caller Rehearsal Prep | $realCallerPreparationScriptStatus | scripts/prepare-real-caller-rehearsal.ps1 |",

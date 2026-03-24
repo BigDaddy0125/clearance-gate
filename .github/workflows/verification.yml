@@ -49,6 +49,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-caller-integration-handoff.ps1
 
+      - name: Check real caller intake handoff assets
+        shell: pwsh
+        run: .\scripts\check-real-caller-intake-handoff.ps1
+
       - name: Generate profile TLC configs
         shell: pwsh
         run: .\scripts\generate-all-profile-tla-configs.ps1
@@ -80,6 +84,14 @@ jobs:
           -AuthorizeInputPath .\examples\pilot-adapter\change-control-request.json
           -AcknowledgeInputPath .\examples\pilot-adapter\change-control-ack.json
           -Profile itops_deployment_v1
+
+      - name: Initialize real caller intake
+        shell: pwsh
+        run: >
+          .\scripts\initialize-real-caller-intake.ps1
+          -CallerSystem example-caller
+          -Profile itops_deployment_v1
+          -ActionDescription "Example gated deployment action"
 
       - name: TLC green models
         shell: pwsh
@@ -149,3 +161,9 @@ jobs:
         with:
           name: real-caller-rehearsal
           path: artifacts/real-caller-rehearsal
+
+      - name: Upload real caller intake artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-caller-intake
+          path: artifacts/real-caller-intake
