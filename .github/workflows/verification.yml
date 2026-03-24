@@ -41,6 +41,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-delivery-handoff.ps1
 
+      - name: Check caller integration handoff assets
+        shell: pwsh
+        run: .\scripts\check-caller-integration-handoff.ps1
+
       - name: Generate profile TLC configs
         shell: pwsh
         run: .\scripts\generate-all-profile-tla-configs.ps1

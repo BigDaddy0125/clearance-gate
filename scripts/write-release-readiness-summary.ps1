@@ -33,6 +33,14 @@ catch {
 }
 
 try {
+    & (Join-Path $repoRoot "scripts\\check-caller-integration-handoff.ps1") | Out-Null
+    $callerIntegrationStatus = "PASS"
+}
+catch {
+    $callerIntegrationStatus = "FAIL"
+}
+
+try {
     & (Join-Path $repoRoot "scripts\\check-claim-traceability.ps1") | Out-Null
     $traceabilityStatus = "PASS"
 }
@@ -85,6 +93,7 @@ $summaryLines = @(
     "| Traceability | $traceabilityStatus | docs/claim-traceability.md |",
     "| Delivery Handoff | $deliveryHandoffStatus | scripts/check-delivery-handoff.ps1 |",
     "| Controlled Pilot | $controlledPilotStatus | scripts/check-controlled-pilot-readiness.ps1 |",
+    "| Caller Integration | $callerIntegrationStatus | scripts/check-caller-integration-handoff.ps1 |",
     "| Runtime Claim Summary | $runtimeStatus | artifacts/test-results/summary.md |",
     "| TLC Summary | $tlcStatus | artifacts/tlc/summary.md |",
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",

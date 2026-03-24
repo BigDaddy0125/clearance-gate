@@ -58,6 +58,14 @@ Verify:
 - the rollback note is current
 - the pilot rollout preparation script is present and usable
 
+## Caller Integration Gate
+
+Verify:
+
+- `scripts/check-caller-integration-handoff.ps1` passes
+- `scripts/validate-pilot-adapter-example.ps1` passes
+- `scripts/prepare-caller-integration-review.ps1` succeeds
+
 ## Runtime Gate
 
 Verify:
