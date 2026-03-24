@@ -37,6 +37,7 @@ Repository layout:
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
+- `docs/post-pilot-review-flow.md` minimum review path from pilot evidence to an explicit next-step decision
 - `docs/post-pilot-decision-memo.md` template for deciding what happens after the pilot
 - embedded profiles currently include `itops_deployment_v1` and `incident_mitigation_v1`
 - `examples/deployment/appsettings.Production.example.json` minimal deployment config shape
@@ -47,6 +48,7 @@ Repository layout:
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
+- `scripts/prepare-post-pilot-review.ps1` turns a pilot evidence package into a focused post-pilot review directory
 - `scripts/publish-release-bundle.ps1` repeatable local publish bundle for pilot delivery
 - `scripts/validate-release-bundle.ps1` bundle completeness check for local and CI use
 

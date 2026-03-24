@@ -19,6 +19,7 @@ No `v1` planning should start unless:
 - the `v0` pilot is complete
 - the pilot acceptance checklist has been reviewed
 - the pilot outcome has been written down in a post-pilot decision memo
+- the post-pilot review flow has been completed
 
 ## Candidate V1 Themes
 

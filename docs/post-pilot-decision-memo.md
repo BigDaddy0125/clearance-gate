@@ -4,6 +4,11 @@ Use this memo after the first real pilot finishes.
 
 Its purpose is to make the next decision explicit instead of letting scope drift happen through ad hoc requests.
 
+Recommended preparation:
+
+- start from a review directory produced by [prepare-post-pilot-review.ps1](/C:/work/clearance-gate/scripts/prepare-post-pilot-review.ps1)
+- follow [post-pilot-review-flow.md](/C:/work/clearance-gate/docs/post-pilot-review-flow.md)
+
 ## Snapshot
 
 - Pilot name:
