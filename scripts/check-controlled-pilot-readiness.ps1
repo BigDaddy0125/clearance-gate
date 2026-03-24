@@ -10,6 +10,7 @@ $requiredPaths = @(
     "docs/pilot-dry-run-checklist.md",
     "docs/pilot-rollback-note.md",
     "scripts/prepare-pilot-rollout.ps1",
+    "scripts/run-controlled-pilot-dry-run.ps1",
     "scripts/run-deployment-smoke-check.ps1",
     "scripts/capture-pilot-sample-session.ps1",
     "scripts/prepare-post-pilot-review.ps1",
@@ -30,7 +31,8 @@ $readmeText = Get-Content -Raw -Path $readmePath
 $requiredReadmeMentions = @(
     "docs/pilot-dry-run-checklist.md",
     "docs/pilot-rollback-note.md",
-    "scripts/prepare-pilot-rollout.ps1"
+    "scripts/prepare-pilot-rollout.ps1",
+    "scripts/run-controlled-pilot-dry-run.ps1"
 )
 
 foreach ($mention in $requiredReadmeMentions) {

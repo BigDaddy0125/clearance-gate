@@ -57,6 +57,7 @@ Verify:
 - the dry-run checklist is current
 - the rollback note is current
 - the pilot rollout preparation script is present and usable
+- `scripts/run-controlled-pilot-dry-run.ps1` is present and usable
 
 ## Caller Integration Gate
 

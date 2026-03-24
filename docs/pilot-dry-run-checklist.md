@@ -25,6 +25,10 @@ Perform the following in order:
 5. run [capture-pilot-sample-session.ps1](/C:/work/clearance-gate/scripts/capture-pilot-sample-session.ps1)
 6. prepare a post-pilot review directory from the captured evidence
 
+Runnable helper:
+
+- [run-controlled-pilot-dry-run.ps1](/C:/work/clearance-gate/scripts/run-controlled-pilot-dry-run.ps1)
+
 ## Required Signals
 
 The dry run is acceptable only if:
