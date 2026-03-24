@@ -23,6 +23,7 @@ Repository layout:
 - `docs/operations-runbook.md` startup, schema, and verification runbook
 - `docs/observability-contract.md` stable event ids and structured logging contract
 - `docs/operator-logging-guide.md` operator-focused guide for triaging current boundary events
+- `docs/operator-triage-cheatsheet.md` shortest operator triage reference for startup, caller, profile, and lookup issues
 - `docs/profile-lifecycle.md` profile naming, versioning, and fail-closed lifecycle rules
 - `docs/release-readiness.md` current release gate checklist
 - `docs/v0-scope.md` v0 pilot scope and completion definition
@@ -43,6 +44,7 @@ Repository layout:
 - `examples/deployment/appsettings.Production.example.json` minimal deployment config shape
 - `examples/deployment/appsettings.Pilot.example.json` pilot-oriented deployment config shape
 - `examples/deployment/appsettings.LocalValidation.example.json` local validation config shape
+- `examples/operations/operator-log-sample.jsonl` sample structured log lines for operator triage and review handoff
 - `examples/pilot-adapter/` narrow caller-side mapping samples
 - `tla/` machine-checkable models and scenario configs
 - `src/` executable service and libraries

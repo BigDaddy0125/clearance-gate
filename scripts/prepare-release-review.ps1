@@ -36,9 +36,11 @@ $reviewName = "release-review-" + [DateTime]::UtcNow.ToString("yyyyMMdd-HHmmss")
 $reviewRoot = Join-Path $outputRoot $reviewName
 $reviewDocsRoot = Join-Path $reviewRoot "docs"
 $reviewExamplesRoot = Join-Path $reviewRoot "examples\deployment"
+$reviewOperationsExamplesRoot = Join-Path $reviewRoot "examples\operations"
 
 [System.IO.Directory]::CreateDirectory($reviewDocsRoot) | Out-Null
 [System.IO.Directory]::CreateDirectory($reviewExamplesRoot) | Out-Null
+[System.IO.Directory]::CreateDirectory($reviewOperationsExamplesRoot) | Out-Null
 
 Copy-Item -Path $bundleManifestPath -Destination $reviewRoot
 Copy-Item -Path $summaryPath -Destination (Join-Path $reviewRoot "release-readiness-summary.md")
@@ -48,6 +50,8 @@ $docsToCopy = @(
     "release-readiness.md",
     "operations-runbook.md",
     "observability-contract.md",
+    "operator-logging-guide.md",
+    "operator-triage-cheatsheet.md",
     "api-examples.md",
     "pilot-evidence-package.md"
 )
@@ -61,6 +65,11 @@ Get-ChildItem -Path (Join-Path $bundleRoot "examples\deployment") -Filter *.json
         Copy-Item -Path $_.FullName -Destination $reviewExamplesRoot
     }
 
+Get-ChildItem -Path (Join-Path $bundleRoot "examples\operations") -File |
+    ForEach-Object {
+        Copy-Item -Path $_.FullName -Destination $reviewOperationsExamplesRoot
+    }
+
 $bundleManifest = Get-Content -Raw -Path $bundleManifestPath | ConvertFrom-Json
 $reviewManifest = [ordered]@{
     createdUtc = [DateTime]::UtcNow.ToString("o")
@@ -72,6 +81,9 @@ $reviewManifest = [ordered]@{
         Get-ChildItem -Path $reviewExamplesRoot -Filter *.json -File |
             Sort-Object Name |
             ForEach-Object { "examples/deployment/" + $_.Name }
+        Get-ChildItem -Path $reviewOperationsExamplesRoot -File |
+            Sort-Object Name |
+            ForEach-Object { "examples/operations/" + $_.Name }
     )
 }
 

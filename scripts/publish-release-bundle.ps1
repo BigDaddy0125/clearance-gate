@@ -22,7 +22,9 @@ $publishRoot = [System.IO.Path]::GetFullPath($resolvedOutputRoot)
 $appOutput = Join-Path $publishRoot "app"
 $bundleDocs = Join-Path $publishRoot "docs"
 $bundleExamples = Join-Path $publishRoot "examples\deployment"
+$bundleOperationsExamples = Join-Path $publishRoot "examples\operations"
 $deploymentExamplesRoot = Join-Path $repoRoot "examples\deployment"
+$operationsExamplesRoot = Join-Path $repoRoot "examples\operations"
 
 if (Test-Path $publishRoot) {
     for ($attempt = 1; $attempt -le 5; $attempt++) {
@@ -43,6 +45,7 @@ if (Test-Path $publishRoot) {
 [System.IO.Directory]::CreateDirectory($appOutput) | Out-Null
 [System.IO.Directory]::CreateDirectory($bundleDocs) | Out-Null
 [System.IO.Directory]::CreateDirectory($bundleExamples) | Out-Null
+[System.IO.Directory]::CreateDirectory($bundleOperationsExamples) | Out-Null
 
 $apiProject = Join-Path $repoRoot "src\ClearanceGate.Api\ClearanceGate.Api.csproj"
 $publishArguments = @(
@@ -82,6 +85,8 @@ $documentsToCopy = @(
     "docs\release-readiness.md",
     "docs\operations-runbook.md",
     "docs\observability-contract.md",
+    "docs\operator-logging-guide.md",
+    "docs\operator-triage-cheatsheet.md",
     "docs\api-examples.md",
     "docs\pilot-evidence-package.md"
 )
@@ -93,6 +98,11 @@ foreach ($relativePath in $documentsToCopy) {
 Get-ChildItem -Path $deploymentExamplesRoot -Filter *.json -File |
     ForEach-Object {
         Copy-Item -Path $_.FullName -Destination $bundleExamples
+    }
+
+Get-ChildItem -Path $operationsExamplesRoot -File |
+    ForEach-Object {
+        Copy-Item -Path $_.FullName -Destination $bundleOperationsExamples
     }
 
 $profileNames = Get-ChildItem -Path (Join-Path $repoRoot "src\ClearanceGate.Profiles") -Filter *.json -File |
@@ -121,6 +131,8 @@ $manifest = [ordered]@{
         "docs/release-readiness.md",
         "docs/operations-runbook.md",
         "docs/observability-contract.md",
+        "docs/operator-logging-guide.md",
+        "docs/operator-triage-cheatsheet.md",
         "docs/api-examples.md",
         "docs/pilot-evidence-package.md"
     )
@@ -128,6 +140,9 @@ $manifest = [ordered]@{
         Get-ChildItem -Path $deploymentExamplesRoot -Filter *.json -File |
             Sort-Object Name |
             ForEach-Object { "examples/deployment/" + $_.Name }
+        Get-ChildItem -Path $operationsExamplesRoot -File |
+            Sort-Object Name |
+            ForEach-Object { "examples/operations/" + $_.Name }
     )
 }
 

@@ -177,6 +177,7 @@ This produces a timestamped directory under `artifacts/release-review` containin
 - the release-readiness summary
 - deployment and operator docs
 - all deployment config examples
+- operator log samples for triage review
 
 Use this as the pre-pilot review handoff directory.
 

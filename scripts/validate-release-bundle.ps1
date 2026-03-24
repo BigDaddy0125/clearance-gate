@@ -20,6 +20,7 @@ $manifestPath = Join-Path $bundleRoot "bundle-manifest.json"
 $appDirectory = Join-Path $bundleRoot "app"
 $docsDirectory = Join-Path $bundleRoot "docs"
 $examplesDirectory = Join-Path $bundleRoot "examples\deployment"
+$operationsExamplesDirectory = Join-Path $bundleRoot "examples\operations"
 
 if (-not (Test-Path $manifestPath)) {
     throw "Bundle manifest is missing at '$manifestPath'."
@@ -44,6 +45,8 @@ $requiredDocs = @(
     "release-readiness.md",
     "operations-runbook.md",
     "observability-contract.md",
+    "operator-logging-guide.md",
+    "operator-triage-cheatsheet.md",
     "api-examples.md",
     "pilot-evidence-package.md"
 )
@@ -65,6 +68,17 @@ foreach ($example in $requiredExamples) {
     $examplePath = Join-Path $examplesDirectory $example
     if (-not (Test-Path $examplePath)) {
         throw "Deployment config example is missing at '$examplePath'."
+    }
+}
+
+$requiredOperationsExamples = @(
+    "operator-log-sample.jsonl"
+)
+
+foreach ($example in $requiredOperationsExamples) {
+    $examplePath = Join-Path $operationsExamplesDirectory $example
+    if (-not (Test-Path $examplePath)) {
+        throw "Operations example is missing at '$examplePath'."
     }
 }
 

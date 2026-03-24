@@ -93,4 +93,5 @@ Reference:
 
 - [observability-contract.md](/C:/work/clearance-gate/docs/observability-contract.md)
 - [operator-logging-guide.md](/C:/work/clearance-gate/docs/operator-logging-guide.md)
+- [operator-triage-cheatsheet.md](/C:/work/clearance-gate/docs/operator-triage-cheatsheet.md)
 - [pilot-incident-response.md](/C:/work/clearance-gate/docs/pilot-incident-response.md)

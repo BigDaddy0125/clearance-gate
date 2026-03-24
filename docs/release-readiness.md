@@ -93,6 +93,7 @@ Verify:
 - `powershell -ExecutionPolicy Bypass -File .\scripts\validate-release-bundle.ps1` succeeds
 - the release bundle includes `bundle-manifest.json`
 - the bundle includes deployment docs and all deployment config examples
+- the bundle includes operator triage docs and sample logs
 - `powershell -ExecutionPolicy Bypass -File .\scripts\prepare-release-review.ps1` succeeds
 
 ## Pilot Execution Gate
