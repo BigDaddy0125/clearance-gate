@@ -41,6 +41,14 @@ Verify:
 - [security-claims.md](/C:/work/clearance-gate/docs/security-claims.md) and [claim-traceability.md](/C:/work/clearance-gate/docs/claim-traceability.md) are current
 - `scripts/check-claim-traceability.ps1` passes
 
+## Delivery Handoff Gate
+
+Verify:
+
+- `scripts/check-delivery-handoff.ps1` passes
+- operator, deployment, pilot, and review handoff assets remain present
+- README entry points remain current for those assets
+
 ## Runtime Gate
 
 Verify:

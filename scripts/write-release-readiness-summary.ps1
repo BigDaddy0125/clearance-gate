@@ -17,6 +17,14 @@ $resolvedOutputPath =
 
 $traceabilityStatus = "UNKNOWN"
 try {
+    & (Join-Path $repoRoot "scripts\\check-delivery-handoff.ps1") | Out-Null
+    $deliveryHandoffStatus = "PASS"
+}
+catch {
+    $deliveryHandoffStatus = "FAIL"
+}
+
+try {
     & (Join-Path $repoRoot "scripts\\check-claim-traceability.ps1") | Out-Null
     $traceabilityStatus = "PASS"
 }
@@ -67,6 +75,7 @@ $summaryLines = @(
     "| Gate | Status | Anchor |",
     "| --- | --- | --- |",
     "| Traceability | $traceabilityStatus | docs/claim-traceability.md |",
+    "| Delivery Handoff | $deliveryHandoffStatus | scripts/check-delivery-handoff.ps1 |",
     "| Runtime Claim Summary | $runtimeStatus | artifacts/test-results/summary.md |",
     "| TLC Summary | $tlcStatus | artifacts/tlc/summary.md |",
     "| Release Bundle | $bundleStatus | artifacts/publish/bundle-manifest.json |",

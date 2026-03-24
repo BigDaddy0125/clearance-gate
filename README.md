@@ -50,6 +50,7 @@ Repository layout:
 - `src/` executable service and libraries
 - `docs/claim-traceability.md` claim-to-formal/runtime/test mapping
 - `scripts/check-claim-traceability.ps1` checklist completeness guard
+- `scripts/check-delivery-handoff.ps1` repository-backed completeness check for delivery, pilot, and review handoff assets
 - `scripts/run-deployment-smoke-check.ps1` bounded deployment smoke flow
 - `scripts/capture-pilot-sample-session.ps1` runs the sample path with unique ids and packages the resulting evidence
 - `scripts/package-pilot-evidence.ps1` packages bundle metadata and pilot evidence into a reviewable archive directory
