@@ -41,6 +41,10 @@ jobs:
         shell: pwsh
         run: .\scripts\check-delivery-handoff.ps1
 
+      - name: Check controlled pilot readiness assets
+        shell: pwsh
+        run: .\scripts\check-controlled-pilot-readiness.ps1
+
       - name: Check caller integration handoff assets
         shell: pwsh
         run: .\scripts\check-caller-integration-handoff.ps1
@@ -64,6 +68,18 @@ jobs:
       - name: Validate release bundle
         shell: pwsh
         run: .\scripts\validate-release-bundle.ps1
+
+      - name: Prepare caller integration review
+        shell: pwsh
+        run: .\scripts\prepare-caller-integration-review.ps1
+
+      - name: Prepare real caller rehearsal review
+        shell: pwsh
+        run: >
+          .\scripts\prepare-real-caller-rehearsal.ps1
+          -AuthorizeInputPath .\examples\pilot-adapter\change-control-request.json
+          -AcknowledgeInputPath .\examples\pilot-adapter\change-control-ack.json
+          -Profile itops_deployment_v1
 
       - name: TLC green models
         shell: pwsh
@@ -121,3 +137,15 @@ jobs:
         with:
           name: release-readiness
           path: artifacts/release-readiness
+
+      - name: Upload caller integration review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: caller-integration-review
+          path: artifacts/caller-integration-review
+
+      - name: Upload real caller rehearsal artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-caller-rehearsal
+          path: artifacts/real-caller-rehearsal

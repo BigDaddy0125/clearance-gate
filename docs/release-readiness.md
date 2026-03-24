@@ -104,9 +104,13 @@ Primary anchors:
 The GitHub Actions workflow should publish:
 
 - traceability pass/fail
+- controlled pilot readiness pass/fail
+- caller integration handoff pass/fail
 - runtime claim summary
 - TLC summary
 - release bundle status, commit, and embedded profile list
+- caller integration review artifacts
+- real caller rehearsal artifacts
 - pilot-execution support anchors
 - uploaded runtime and TLC artifacts
 
