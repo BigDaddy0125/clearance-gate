@@ -16,14 +16,10 @@ $resolvedOutputRoot =
         $OutputRoot
     }
 
-& (Join-Path $repoRoot "scripts\prepare-release-review.ps1") | Out-Null
+$releaseReviewRoot = & (Join-Path $repoRoot "scripts\prepare-release-review.ps1")
 & (Join-Path $repoRoot "scripts\write-release-readiness-summary.ps1") | Out-Null
 
-$releaseReviewRoot = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\release-review") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-if ($null -eq $releaseReviewRoot) {
+if ([string]::IsNullOrWhiteSpace([string]$releaseReviewRoot) -or -not (Test-Path $releaseReviewRoot)) {
     throw "Release review directory could not be prepared."
 }
 
@@ -55,11 +51,11 @@ Copy-Item -Path (Join-Path $repoRoot "examples\operations\operator-log-sample.js
 Copy-Item -Path (Join-Path $repoRoot "examples\deployment\appsettings.Pilot.example.json") -Destination $examplesRoot
 Copy-Item -Path (Join-Path $repoRoot "examples\deployment\appsettings.Production.example.json") -Destination $examplesRoot
 
-Copy-Item -Path (Join-Path $releaseReviewRoot.FullName "*") -Destination $reviewRoot -Recurse
+Copy-Item -Path (Join-Path $releaseReviewRoot "*") -Destination $reviewRoot -Recurse
 
 $rolloutManifest = [ordered]@{
     createdUtc = [DateTime]::UtcNow.ToString("o")
-    sourceReleaseReview = $releaseReviewRoot.FullName
+    sourceReleaseReview = $releaseReviewRoot
     releaseReadinessSummary = "release-review/release-readiness-summary.md"
     requiredDocs = @(
         "docs/pilot-dry-run-checklist.md",
@@ -80,3 +76,4 @@ $rolloutManifest = [ordered]@{
 $rolloutManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $rolloutRoot "rollout-manifest.json")
 
 Write-Host ("Prepared pilot rollout at " + $rolloutRoot)
+$rolloutRoot

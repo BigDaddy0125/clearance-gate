@@ -32,21 +32,17 @@ $rehearsalRoot = & (Join-Path $repoRoot "scripts\prepare-real-caller-rehearsal.p
     -AcknowledgeInputPath (Join-Path $resolvedIntakeRoot "inputs\caller-acknowledge.json") `
     -Profile ([string]$manifest.profile)
 
+if ([string]::IsNullOrWhiteSpace([string]$rehearsalRoot) -or -not (Test-Path $rehearsalRoot)) {
+    throw "Failed to locate the prepared real caller rehearsal directory."
+}
+
 $promotionName = "real-caller-promotion-" + [DateTime]::UtcNow.ToString("yyyyMMdd-HHmmss")
 $promotionRoot = Join-Path $resolvedOutputRoot $promotionName
 [System.IO.Directory]::CreateDirectory($promotionRoot) | Out-Null
 
 Copy-Item -Path $manifestPath -Destination (Join-Path $promotionRoot "intake-manifest.json")
 
-$latestRehearsal = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\real-caller-rehearsal") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-if ($null -eq $latestRehearsal) {
-    throw "Failed to locate the prepared real caller rehearsal directory."
-}
-
-Copy-Item -Path (Join-Path $latestRehearsal.FullName "review-manifest.json") -Destination (Join-Path $promotionRoot "rehearsal-review-manifest.json")
+Copy-Item -Path (Join-Path $rehearsalRoot "review-manifest.json") -Destination (Join-Path $promotionRoot "rehearsal-review-manifest.json")
 
 $promotionManifest = [ordered]@{
     createdUtc = [DateTime]::UtcNow.ToString("o")
@@ -54,9 +50,10 @@ $promotionManifest = [ordered]@{
     callerSystem = [string]$manifest.callerSystem
     profile = [string]$manifest.profile
     actionDescription = [string]$manifest.actionDescription
-    rehearsalRoot = $latestRehearsal.FullName
+    rehearsalRoot = $rehearsalRoot
 }
 
 $promotionManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $promotionRoot "promotion-manifest.json")
 
 Write-Host ("Promoted real caller intake at " + $promotionRoot)
+$promotionRoot

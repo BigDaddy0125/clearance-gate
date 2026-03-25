@@ -47,7 +47,11 @@ $resolvedAcknowledgeInputPath =
     }
 
 & (Join-Path $repoRoot "scripts\validate-release-bundle.ps1") | Out-Null
-& (Join-Path $repoRoot "scripts\prepare-pilot-rollout.ps1") | Out-Null
+$pilotRolloutRoot = & (Join-Path $repoRoot "scripts\prepare-pilot-rollout.ps1")
+
+if ([string]::IsNullOrWhiteSpace([string]$pilotRolloutRoot) -or -not (Test-Path $pilotRolloutRoot)) {
+    throw "Failed to prepare pilot rollout material."
+}
 
 $publishRoot = Join-Path $repoRoot "artifacts\publish\app"
 $publishedExe = Join-Path $publishRoot "ClearanceGate.Api.exe"
@@ -97,36 +101,36 @@ try {
         }
     }
 
-    & (Join-Path $repoRoot "scripts\run-caller-integration-rehearsal.ps1") `
+    $callerIntegrationRehearsalRoot = & (Join-Path $repoRoot "scripts\run-caller-integration-rehearsal.ps1") `
         -BaseUrl $BaseUrl `
         -AuditStorePath $resolvedAuditStorePath `
         -AuthorizeInputPath $resolvedAuthorizeInputPath `
         -AcknowledgeInputPath $resolvedAcknowledgeInputPath `
         -Profile $Profile `
-        -UseExistingHost | Out-Null
+        -UseExistingHost
 
-    & (Join-Path $repoRoot "scripts\prepare-post-pilot-review.ps1") | Out-Null
+    if ([string]::IsNullOrWhiteSpace([string]$callerIntegrationRehearsalRoot) -or -not (Test-Path $callerIntegrationRehearsalRoot)) {
+        throw "Failed to prepare the caller integration rehearsal for the near-real pilot dry-run."
+    }
+
+    $pilotEvidenceRoot = Get-Content -Raw -Path (Join-Path $callerIntegrationRehearsalRoot "rehearsal-manifest.json") |
+        ConvertFrom-Json |
+        Select-Object -ExpandProperty pilotEvidenceRoot
+
+    if ([string]::IsNullOrWhiteSpace([string]$pilotEvidenceRoot) -or -not (Test-Path $pilotEvidenceRoot)) {
+        throw "Failed to resolve pilot evidence produced by the caller integration rehearsal."
+    }
+
+    $postPilotReviewRoot = & (Join-Path $repoRoot "scripts\prepare-post-pilot-review.ps1") -EvidencePackageRoot $pilotEvidenceRoot
+
+    if ([string]::IsNullOrWhiteSpace([string]$postPilotReviewRoot) -or -not (Test-Path $postPilotReviewRoot)) {
+        throw "Failed to prepare post-pilot review for the near-real pilot dry-run."
+    }
 }
 finally {
     Stop-Job $job -ErrorAction SilentlyContinue | Out-Null
     Remove-Job $job -Force -ErrorAction SilentlyContinue | Out-Null
 }
-
-$latestPilotRollout = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\pilot-rollout") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-$latestCallerRehearsal = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\caller-integration-rehearsal") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-$latestPilotEvidence = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\pilot-evidence") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-$latestPostPilotReview = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\post-pilot-review") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
 
 $dryRunManifest = [ordered]@{
     createdUtc = [DateTime]::UtcNow.ToString("o")
@@ -135,12 +139,13 @@ $dryRunManifest = [ordered]@{
     auditStorePath = $resolvedAuditStorePath
     authorizeInputPath = $resolvedAuthorizeInputPath
     acknowledgeInputPath = $resolvedAcknowledgeInputPath
-    pilotRolloutRoot = if ($null -eq $latestPilotRollout) { "" } else { $latestPilotRollout.FullName }
-    callerIntegrationRehearsalRoot = if ($null -eq $latestCallerRehearsal) { "" } else { $latestCallerRehearsal.FullName }
-    pilotEvidenceRoot = if ($null -eq $latestPilotEvidence) { "" } else { $latestPilotEvidence.FullName }
-    postPilotReviewRoot = if ($null -eq $latestPostPilotReview) { "" } else { $latestPostPilotReview.FullName }
+    pilotRolloutRoot = $pilotRolloutRoot
+    callerIntegrationRehearsalRoot = $callerIntegrationRehearsalRoot
+    pilotEvidenceRoot = $pilotEvidenceRoot
+    postPilotReviewRoot = $postPilotReviewRoot
 }
 
 $dryRunManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $dryRunRoot "dry-run-manifest.json")
 
 Write-Host ("Near-real pilot dry-run completed at " + $dryRunRoot)
+$dryRunRoot

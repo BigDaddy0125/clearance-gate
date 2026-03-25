@@ -54,7 +54,11 @@ $resolvedAuditStorePath =
     -AuthorizeInputPath $resolvedAuthorizeInputPath `
     -AcknowledgeInputPath $resolvedAcknowledgeInputPath `
     -Profile $Profile | Out-Null
-& (Join-Path $repoRoot "scripts\prepare-caller-integration-review.ps1") | Out-Null
+$callerReviewRoot = & (Join-Path $repoRoot "scripts\prepare-caller-integration-review.ps1")
+
+if ([string]::IsNullOrWhiteSpace([string]$callerReviewRoot) -or -not (Test-Path $callerReviewRoot)) {
+    throw "Failed to prepare caller integration review."
+}
 
 $rehearsalName = "caller-integration-rehearsal-" + [DateTime]::UtcNow.ToString("yyyyMMdd-HHmmss")
 $rehearsalRoot = Join-Path $resolvedOutputRoot $rehearsalName
@@ -194,12 +198,16 @@ try {
     Write-JsonFile -Path (Join-Path $responsesRoot "audit-request-compact.json") -Value $requestCompact
     Write-JsonFile -Path (Join-Path $responsesRoot "audit-request-export.json") -Value $requestExport
 
-    & (Join-Path $repoRoot "scripts\package-pilot-evidence.ps1") `
+    $pilotEvidenceRoot = & (Join-Path $repoRoot "scripts\package-pilot-evidence.ps1") `
         -AuthorizeResponsePath (Join-Path $responsesRoot "authorize-response.json") `
         -AcknowledgeResponsePath (Join-Path $responsesRoot "acknowledge-response.json") `
         -CompactAuditPath (Join-Path $responsesRoot "audit-compact.json") `
         -ExportAuditPath (Join-Path $responsesRoot "audit-export.json") `
-        -ProfilesResponsePath (Join-Path $responsesRoot "profiles-response.json") | Out-Null
+        -ProfilesResponsePath (Join-Path $responsesRoot "profiles-response.json")
+
+    if ([string]::IsNullOrWhiteSpace([string]$pilotEvidenceRoot) -or -not (Test-Path $pilotEvidenceRoot)) {
+        throw "Failed to package pilot evidence for the caller integration rehearsal."
+    }
 }
 finally {
     if ($null -ne $job) {
@@ -207,14 +215,6 @@ finally {
         Remove-Job $job -Force -ErrorAction SilentlyContinue | Out-Null
     }
 }
-
-$latestEvidence = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\pilot-evidence") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-$latestCallerReview = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\caller-integration-review") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
 
 $rehearsalManifest = [ordered]@{
     createdUtc = [DateTime]::UtcNow.ToString("o")
@@ -225,10 +225,11 @@ $rehearsalManifest = [ordered]@{
     auditStorePath = $resolvedAuditStorePath
     authorizeInputPath = $resolvedAuthorizeInputPath
     acknowledgeInputPath = $resolvedAcknowledgeInputPath
-    pilotEvidenceRoot = if ($null -eq $latestEvidence) { "" } else { $latestEvidence.FullName }
-    callerIntegrationReviewRoot = if ($null -eq $latestCallerReview) { "" } else { $latestCallerReview.FullName }
+    pilotEvidenceRoot = $pilotEvidenceRoot
+    callerIntegrationReviewRoot = $callerReviewRoot
 }
 
 $rehearsalManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $rehearsalRoot "rehearsal-manifest.json")
 
 Write-Host ("Caller integration rehearsal completed at " + $rehearsalRoot)
+$rehearsalRoot

@@ -113,3 +113,4 @@ $reviewManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $revie
 & (Join-Path $repoRoot "scripts\initialize-post-pilot-decision-memo.ps1") -ReviewRoot $reviewRoot | Out-Null
 
 Write-Host ("Prepared post-pilot review at " + $reviewRoot)
+$reviewRoot

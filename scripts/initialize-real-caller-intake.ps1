@@ -83,3 +83,4 @@ $manifest = [ordered]@{
 $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $intakeRoot "intake-manifest.json")
 
 Write-Host ("Initialized real caller intake at " + $intakeRoot)
+$intakeRoot

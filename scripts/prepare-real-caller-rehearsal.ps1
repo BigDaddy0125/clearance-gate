@@ -91,3 +91,4 @@ $manifest = [ordered]@{
 $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $rehearsalRoot "review-manifest.json")
 
 Write-Host ("Prepared real caller rehearsal at " + $rehearsalRoot)
+$rehearsalRoot

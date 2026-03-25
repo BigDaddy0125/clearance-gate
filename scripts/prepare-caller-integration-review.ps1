@@ -61,3 +61,4 @@ $reviewManifest = [ordered]@{
 $reviewManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $reviewRoot "review-manifest.json")
 
 Write-Host ("Prepared caller integration review at " + $reviewRoot)
+$reviewRoot

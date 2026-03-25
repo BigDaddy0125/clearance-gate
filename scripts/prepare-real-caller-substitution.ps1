@@ -38,20 +38,14 @@ if (-not (Test-Path $AcknowledgeInputPath)) {
     throw "Acknowledge input is missing at '$AcknowledgeInputPath'."
 }
 
-& (Join-Path $repoRoot "scripts\initialize-real-caller-intake.ps1") `
+$intakeRoot = & (Join-Path $repoRoot "scripts\initialize-real-caller-intake.ps1") `
     -CallerSystem $CallerSystem `
     -Profile $Profile `
-    -ActionDescription $ActionDescription | Out-Null
+    -ActionDescription $ActionDescription
 
-$latestIntake = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\real-caller-intake") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-if ($null -eq $latestIntake) {
+if ([string]::IsNullOrWhiteSpace([string]$intakeRoot) -or -not (Test-Path $intakeRoot)) {
     throw "Failed to initialize real caller intake."
 }
-
-$intakeRoot = $latestIntake.FullName
 $intakeAuthorizePath = Join-Path $intakeRoot "inputs\caller-authorize.json"
 $intakeAcknowledgePath = Join-Path $intakeRoot "inputs\caller-acknowledge.json"
 
@@ -72,14 +66,10 @@ $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath
     -IntakeRoot $intakeRoot `
     -RequireReadyStatus | Out-Null
 
-& (Join-Path $repoRoot "scripts\promote-real-caller-intake.ps1") `
-    -IntakeRoot $intakeRoot | Out-Null
+$promotionRoot = & (Join-Path $repoRoot "scripts\promote-real-caller-intake.ps1") `
+    -IntakeRoot $intakeRoot
 
-$latestPromotion = Get-ChildItem -Path (Join-Path $repoRoot "artifacts\real-caller-promotion") -Directory |
-    Sort-Object LastWriteTimeUtc -Descending |
-    Select-Object -First 1
-
-if ($null -eq $latestPromotion) {
+if ([string]::IsNullOrWhiteSpace([string]$promotionRoot) -or -not (Test-Path $promotionRoot)) {
     throw "Failed to create real caller promotion package."
 }
 
@@ -95,10 +85,11 @@ $substitutionManifest = [ordered]@{
     authorizeInputPath = $AuthorizeInputPath
     acknowledgeInputPath = $AcknowledgeInputPath
     intakeRoot = $intakeRoot
-    promotionRoot = $latestPromotion.FullName
+    promotionRoot = $promotionRoot
     nextCommand = "powershell -ExecutionPolicy Bypass -File .\scripts\run-caller-integration-rehearsal.ps1 -AuthorizeInputPath `"$AuthorizeInputPath`" -AcknowledgeInputPath `"$AcknowledgeInputPath`" -Profile $Profile"
 }
 
 $substitutionManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $substitutionRoot "substitution-manifest.json")
 
 Write-Host ("Prepared real caller substitution at " + $substitutionRoot)
+$substitutionRoot

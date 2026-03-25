@@ -180,3 +180,4 @@ if (Test-Path (Join-Path $responsesRoot "acknowledge-response.json")) {
 $evidenceManifest | ConvertTo-Json -Depth 10 | Set-Content -Path (Join-Path $packageRoot "evidence-manifest.json")
 
 Write-Host ("Packaged pilot evidence to " + $packageRoot)
+$packageRoot
