@@ -44,6 +44,7 @@ Repository layout:
 - `docs/real-caller-rehearsal.md` path for validating and rehearsing caller-owned payloads that preserve the maintained adapter shape
 - `docs/near-real-pilot-dry-run.md` one full dry-run path that starts from the maintained near-real caller payloads
 - `docs/real-caller-substitution.md` direct substitution path from caller-owned payload files into intake, promotion, and rehearsal preparation
+- `docs/real-caller-execution-checklist.md` shortest copy-paste path for running real caller payloads through intake, rehearsal, and controlled pilot execution
 - `docs/caller-onboarding-checklist.md` minimum checklist for systems that call ClearanceGate
 - `docs/post-v0-backlog.md` deferred and next-phase work after the current pilot boundary
 - `docs/v1-backlog.md` smallest safe next-version candidates after the pilot
