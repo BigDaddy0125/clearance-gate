@@ -43,6 +43,7 @@ The caller must supply:
   - explicit owner and role
 - `metadata`
   - source system and timestamp
+  - timestamp must be UTC ISO 8601 and end in `Z` or `+00:00`
 
 The caller must not:
 

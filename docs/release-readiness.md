@@ -22,6 +22,7 @@ Release is blocked unless all of the following are green:
 Verify:
 
 - embedded profiles load successfully
+- authentication configuration is valid
 - profile names use canonical `<family>_v<positive integer>` identity
 - audit store configuration is valid
 - audit schema is supported or migratable
