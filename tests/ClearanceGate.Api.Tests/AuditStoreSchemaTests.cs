@@ -59,8 +59,22 @@ public sealed class AuditStoreSchemaTests
         dataCommand.CommandText = "SELECT COUNT(*) FROM decisions WHERE decision_id = 'legacy-decision';";
         var dataCount = await dataCommand.ExecuteScalarAsync();
 
+        var fingerprintColumnCommand = connection.CreateCommand();
+        fingerprintColumnCommand.CommandText = "PRAGMA table_info(decisions);";
+        await using var columnReader = await fingerprintColumnCommand.ExecuteReaderAsync();
+        var fingerprintColumnExists = false;
+        while (await columnReader.ReadAsync())
+        {
+            if (string.Equals(columnReader.GetString(1), "request_fingerprint", StringComparison.Ordinal))
+            {
+                fingerprintColumnExists = true;
+                break;
+            }
+        }
+
         Assert.Equal(ClearanceGate.Audit.AuditStoreSchema.CurrentVersion.ToString(), Convert.ToString(version));
         Assert.Equal(1L, Convert.ToInt64(dataCount));
+        Assert.True(fingerprintColumnExists);
     }
 
     [Fact]
@@ -97,6 +111,18 @@ public sealed class AuditStoreSchemaTests
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => initializer.InitializeAsync(CancellationToken.None));
 
         Assert.Contains("Required table 'decision_timeline' is missing", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_RejectsCurrentSchemaMissingRequestFingerprintColumn()
+    {
+        using var harness = CreateHarness();
+        SeedCurrentSchemaWithoutRequestFingerprint(harness.DatabasePath);
+        var initializer = CreateInitializer(harness.DatabasePath);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => initializer.InitializeAsync(CancellationToken.None));
+
+        Assert.Contains("Required column 'decisions.request_fingerprint' is missing", exception.Message, StringComparison.Ordinal);
     }
 
     private static ClearanceGate.Audit.SqliteAuditStoreInitializer CreateInitializer(string databasePath)
@@ -245,6 +271,7 @@ public sealed class AuditStoreSchemaTests
                 decision_id TEXT NOT NULL UNIQUE,
                 profile TEXT NOT NULL,
                 owner TEXT NOT NULL,
+                request_fingerprint TEXT NULL,
                 acknowledger_id TEXT NULL,
                 outcome TEXT NOT NULL,
                 clearance_state TEXT NOT NULL,
@@ -258,6 +285,61 @@ public sealed class AuditStoreSchemaTests
                 decision_id TEXT NOT NULL,
                 constraint_id TEXT NOT NULL,
                 PRIMARY KEY (decision_id, constraint_id)
+            );
+            """;
+        command.Parameters.AddWithValue("$key", ClearanceGate.Audit.AuditStoreSchema.SchemaVersionKey);
+        command.Parameters.AddWithValue("$value", ClearanceGate.Audit.AuditStoreSchema.CurrentVersion.ToString());
+        command.ExecuteNonQuery();
+    }
+
+    private static void SeedCurrentSchemaWithoutRequestFingerprint(string databasePath)
+    {
+        var connectionStringBuilder = new SqliteConnectionStringBuilder($"Data Source={databasePath}");
+        var directory = Path.GetDirectoryName(Path.GetFullPath(connectionStringBuilder.DataSource));
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var connection = new SqliteConnection(connectionStringBuilder.ToString());
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            CREATE TABLE schema_metadata (
+                key TEXT NOT NULL PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+
+            INSERT INTO schema_metadata (key, value)
+            VALUES ($key, $value);
+
+            CREATE TABLE decisions (
+                request_id TEXT NOT NULL PRIMARY KEY,
+                decision_id TEXT NOT NULL UNIQUE,
+                profile TEXT NOT NULL,
+                owner TEXT NOT NULL,
+                acknowledger_id TEXT NULL,
+                outcome TEXT NOT NULL,
+                clearance_state TEXT NOT NULL,
+                evidence_id TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                kernel_version TEXT NOT NULL,
+                policy_version TEXT NOT NULL
+            );
+
+            CREATE TABLE decision_constraints (
+                decision_id TEXT NOT NULL,
+                constraint_id TEXT NOT NULL,
+                PRIMARY KEY (decision_id, constraint_id)
+            );
+
+            CREATE TABLE decision_timeline (
+                timeline_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                decision_id TEXT NOT NULL,
+                state TEXT NOT NULL,
+                timestamp TEXT NOT NULL
             );
             """;
         command.Parameters.AddWithValue("$key", ClearanceGate.Audit.AuditStoreSchema.SchemaVersionKey);

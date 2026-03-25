@@ -28,6 +28,7 @@ At minimum, set:
 
 - application working directory
 - `ConnectionStrings__AuditStore`
+- `Authentication__ApiKey`
 
 This setting is required. Startup should fail if it is missing or blank.
 
@@ -41,6 +42,7 @@ Example value:
 
 ```text
 ConnectionStrings__AuditStore=Data Source=C:\clearancegate-data\clearancegate.db
+Authentication__ApiKey=replace-with-production-api-key
 ```
 
 ## Local Deployment Steps
@@ -77,6 +79,7 @@ This produces:
 
 ```powershell
 $env:ConnectionStrings__AuditStore = "Data Source=C:\clearancegate-data\clearancegate.db"
+$env:Authentication__ApiKey = "replace-with-production-api-key"
 .\artifacts\publish\app\ClearanceGate.Api.exe
 ```
 
@@ -94,8 +97,9 @@ On first start, confirm:
 Useful checks:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles
-Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles/latest/itops_deployment
+$headers = @{ Authorization = "Bearer replace-with-production-api-key" }
+Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles -Headers $headers
+Invoke-RestMethod -Method Get -Uri http://localhost:5000/profiles/latest/itops_deployment -Headers $headers
 ```
 
 Recommended operational note:
@@ -124,7 +128,7 @@ Reference:
 Example:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run-deployment-smoke-check.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\run-deployment-smoke-check.ps1 -ApiKey "replace-with-production-api-key"
 ```
 
 ## Smoke-Check to Evidence Rule

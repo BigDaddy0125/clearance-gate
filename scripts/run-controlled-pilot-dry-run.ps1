@@ -2,7 +2,8 @@
 param(
     [string]$BaseUrl = "http://127.0.0.1:5081",
     [string]$OutputRoot = "",
-    [string]$AuditStorePath = ""
+    [string]$AuditStorePath = "",
+    [string]$ApiKey = "clearancegate-local-dev-key"
 )
 
 Set-StrictMode -Version Latest
@@ -56,19 +57,21 @@ $job = Start-Job -ScriptBlock {
         [string]$repoRoot,
         [string]$auditStorePath,
         [string]$hostCommand,
-        [string[]]$hostArguments
+        [string[]]$hostArguments,
+        [string]$apiKey
     )
 
     Set-Location $repoRoot
     $env:ConnectionStrings__AuditStore = "Data Source=$auditStorePath"
+    $env:Authentication__ApiKey = $apiKey
     & $hostCommand @hostArguments
-} -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments
+} -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments, $ApiKey
 
 try {
     for ($attempt = 1; $attempt -le 30; $attempt++) {
         Start-Sleep -Seconds 1
         try {
-            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" | Out-Null
+            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers @{ Authorization = "Bearer $ApiKey" } | Out-Null
             break
         }
         catch {
@@ -78,8 +81,8 @@ try {
         }
     }
 
-    & (Join-Path $repoRoot "scripts\run-deployment-smoke-check.ps1") -BaseUrl $BaseUrl | Out-Null
-    & (Join-Path $repoRoot "scripts\capture-pilot-sample-session.ps1") -BaseUrl $BaseUrl | Out-Null
+    & (Join-Path $repoRoot "scripts\run-deployment-smoke-check.ps1") -BaseUrl $BaseUrl -ApiKey $ApiKey | Out-Null
+    & (Join-Path $repoRoot "scripts\capture-pilot-sample-session.ps1") -BaseUrl $BaseUrl -ApiKey $ApiKey | Out-Null
     & (Join-Path $repoRoot "scripts\prepare-post-pilot-review.ps1") | Out-Null
 }
 finally {

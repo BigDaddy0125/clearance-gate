@@ -37,9 +37,9 @@ public sealed class AuthorizationClaimsTests
         Assert.Equal(new[] { "AWAITING_ACK", "AUTHORIZED" }, auditPayload.AuthorizationTimeline.Select(item => item.State));
     }
 
-    // CG2 and CG3: fail-closed state plus bounded acknowledgment
+    // CG2 and CG3: malformed authorization requests fail closed and cannot be released later
     [Fact]
-    public async Task BlockedDecision_CannotBeReleasedByAcknowledgment()
+    public async Task InvalidAuthorizationRequest_CannotBeReleasedByAcknowledgment()
     {
         using var harness = CreateHarness();
         using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
@@ -52,22 +52,20 @@ public sealed class AuthorizationClaimsTests
             new ClearanceGate.Contracts.Acknowledger("alice", "acknowledging_authority"),
             new ClearanceGate.Contracts.AcknowledgmentPayload("risk_acceptance", "2026-03-18T10:05:00Z")));
 
-        var problem = await acknowledgeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
-        var auditPayload = await client.GetFromJsonAsync<ClearanceGate.Contracts.AuditRecordResponse>("/audit/dec-claim-2");
+        var authorizeProblem = await authorizeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
 
-        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
-        Assert.Equal(HttpStatusCode.Conflict, acknowledgeResponse.StatusCode);
-        Assert.NotNull(problem);
-        Assert.Equal("Acknowledgment rejected", problem.Title);
-        Assert.NotNull(auditPayload);
-        Assert.Equal("BLOCK", auditPayload.Outcome);
-        Assert.Single(auditPayload.AuthorizationTimeline);
-        Assert.Equal("INFO_INSUFFICIENT", auditPayload.AuthorizationTimeline[0].State);
+        Assert.Equal(HttpStatusCode.BadRequest, authorizeResponse.StatusCode);
+        Assert.NotNull(authorizeProblem);
+        Assert.Equal("Authorization rejected", authorizeProblem.Title);
+        Assert.Equal(HttpStatusCode.NotFound, acknowledgeResponse.StatusCode);
+
+        var auditResponse = await client.GetAsync("/audit/dec-claim-2");
+        Assert.Equal(HttpStatusCode.NotFound, auditResponse.StatusCode);
     }
 
-    // CG6: profile required-field constraint projects to runtime enforcement
+    // CG6: required input fields are enforced at the API boundary
     [Fact]
-    public async Task MissingSourceSystem_MapsToProfileRequiredFieldConstraint()
+    public async Task MissingSourceSystem_IsRejectedAtApiBoundary()
     {
         using var harness = CreateHarness();
         using var factory = new ClearanceGateApiFactory(harness.DatabasePath);
@@ -75,12 +73,11 @@ public sealed class AuthorizationClaimsTests
         var request = BuildAuthorizationRequest("req-claim-2b", "dec-claim-2b", Array.Empty<string>(), "alice", string.Empty);
 
         var authorizeResponse = await client.PostAsJsonAsync("/authorize", request);
-        var authorizePayload = await authorizeResponse.Content.ReadFromJsonAsync<ClearanceGate.Contracts.AuthorizationResponse>();
+        var problem = await authorizeResponse.Content.ReadFromJsonAsync<ProblemDetails>();
 
-        Assert.Equal(HttpStatusCode.OK, authorizeResponse.StatusCode);
-        Assert.NotNull(authorizePayload);
-        Assert.Equal("BLOCK", authorizePayload.Outcome);
-        Assert.Contains("SOURCE_REQUIRED", authorizePayload.Reason.ConstraintsTriggered);
+        Assert.Equal(HttpStatusCode.BadRequest, authorizeResponse.StatusCode);
+        Assert.NotNull(problem);
+        Assert.Contains("metadata.sourceSystem", problem.Detail, StringComparison.Ordinal);
     }
 
     // CG5: same request id replays to the first durable decision
@@ -93,7 +90,7 @@ public sealed class AuthorizationClaimsTests
         var requests = Enumerable.Range(0, 8)
             .Select(index => BuildAuthorizationRequest(
                 "req-claim-3",
-                $"dec-claim-3-{index}",
+                "dec-claim-3",
                 new[] { "HIGH_IMPACT" },
                 "alice",
                 "change-control"))
@@ -202,7 +199,7 @@ public sealed class AuthorizationClaimsTests
         var requests = Enumerable.Range(0, 3)
             .Select(index => BuildAuthorizationRequest(
                 "req-claim-export-2",
-                $"dec-claim-export-2-{index}",
+                "dec-claim-export-2",
                 new[] { "HIGH_IMPACT" },
                 "alice",
                 "change-control"))

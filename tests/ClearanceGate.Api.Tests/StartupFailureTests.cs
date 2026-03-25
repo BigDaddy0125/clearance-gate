@@ -101,6 +101,26 @@ public sealed class StartupFailureTests
         Assert.Contains("must define a SQLite data source", exception.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ApplicationStartup_RejectsMissingAuthenticationApiKey()
+    {
+        using var harness = CreateHarness();
+        using var factory = new ClearanceGateApiFactory(
+            harness.DatabasePath,
+            services =>
+            {
+                services.PostConfigureAll<ClearanceGate.Api.ApiAuthenticationOptions>(options =>
+                {
+                    options.ApiKey = string.Empty;
+                });
+            });
+
+        var exception = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+
+        Assert.Contains("ClearanceGate startup validation failed", exception.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Authentication API key must not be empty", exception.ToString(), StringComparison.Ordinal);
+    }
+
     private static TemporaryDatabaseHarness CreateHarness()
     {
         var path = Path.Combine(Path.GetTempPath(), $"clearancegate-startup-tests-{Guid.NewGuid():N}.db");

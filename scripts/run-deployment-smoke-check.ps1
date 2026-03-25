@@ -2,7 +2,8 @@
 param(
     [string]$BaseUrl = "http://localhost:5000",
     [string]$ProfileFamily = "itops_deployment",
-    [string]$ExpectedProfileId = "itops_deployment_v1"
+    [string]$ExpectedProfileId = "itops_deployment_v1",
+    [string]$ApiKey = "clearancegate-local-dev-key"
 )
 
 Set-StrictMode -Version Latest
@@ -17,6 +18,7 @@ $expectedRequestId = "req-deployment-smoke-$runSuffix"
 $expectedEvidenceId = "evidence:$expectedDecisionId"
 $authorizeTimestamp = [DateTime]::UtcNow.ToString("o")
 $ackTimestamp = [DateTime]::UtcNow.AddMinutes(1).ToString("o")
+$authHeaders = @{ Authorization = "Bearer $ApiKey" }
 
 function Assert-Equal {
     param(
@@ -42,8 +44,8 @@ function Assert-True {
 }
 
 Write-Host "Checking profile catalog..."
-$profiles = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles"
-$latestProfile = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles/latest/$ProfileFamily"
+$profiles = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers $authHeaders
+$latestProfile = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles/latest/$ProfileFamily" -Headers $authHeaders
 
 Assert-Equal -Name "Latest profile id" -Actual $latestProfile.profile.profile -Expected $ExpectedProfileId
 Assert-True -Name "Catalog contains expected profile" -Condition ($profiles.profiles.profile -contains $ExpectedProfileId)
@@ -59,6 +61,7 @@ $authorizeBody = $authorizePayload | ConvertTo-Json -Depth 10
 $authorizeResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/authorize" `
+    -Headers $authHeaders `
     -ContentType "application/json" `
     -Body $authorizeBody
 
@@ -76,6 +79,7 @@ $ackBody = $ackPayload | ConvertTo-Json -Depth 10
 $ackResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/acknowledge" `
+    -Headers $authHeaders `
     -ContentType "application/json" `
     -Body $ackBody
 
@@ -85,10 +89,10 @@ Assert-Equal -Name "Ack clearanceState" -Actual $ackResponse.clearanceState -Exp
 Assert-Equal -Name "Ack evidenceId" -Actual $ackResponse.evidenceId -Expected $expectedEvidenceId
 
 Write-Host "Checking compact and export audit views..."
-$compactByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$expectedDecisionId"
-$exportByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$expectedDecisionId/export"
-$compactByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$expectedRequestId"
-$exportByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$expectedRequestId/export"
+$compactByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$expectedDecisionId" -Headers $authHeaders
+$exportByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$expectedDecisionId/export" -Headers $authHeaders
+$compactByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$expectedRequestId" -Headers $authHeaders
+$exportByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$expectedRequestId/export" -Headers $authHeaders
 
 Assert-Equal -Name "Compact decision outcome" -Actual $compactByDecision.outcome -Expected "PROCEED"
 Assert-Equal -Name "Compact decision evidenceId" -Actual $compactByDecision.evidenceId -Expected $expectedEvidenceId

@@ -10,6 +10,8 @@ public sealed class DecisionAuditRecord
 
     public required string Owner { get; init; }
 
+    public string? RequestFingerprint { get; init; }
+
     public string? AcknowledgerId { get; set; }
 
     public required string Outcome { get; set; }

@@ -35,6 +35,10 @@ You need:
 
 The current default profile for this path is `itops_deployment_v1`.
 
+If the target host does not use the maintained local default key, also pass:
+
+- `-ApiKey "<real-api-key>"`
+
 ## Step 1: Intake And Promotion
 
 Run:
@@ -74,7 +78,8 @@ cd C:\work\clearance-gate
 powershell -ExecutionPolicy Bypass -File .\scripts\run-caller-integration-rehearsal.ps1 `
   -AuthorizeInputPath .\temp\real-authorize.json `
   -AcknowledgeInputPath .\temp\real-acknowledge.json `
-  -Profile itops_deployment_v1
+  -Profile itops_deployment_v1 `
+  -ApiKey "replace-with-real-api-key"
 ```
 
 This step will:
@@ -101,7 +106,8 @@ cd C:\work\clearance-gate
 powershell -ExecutionPolicy Bypass -File .\scripts\run-near-real-pilot-dry-run.ps1 `
   -AuthorizeInputPath .\temp\real-authorize.json `
   -AcknowledgeInputPath .\temp\real-acknowledge.json `
-  -Profile itops_deployment_v1
+  -Profile itops_deployment_v1 `
+  -ApiKey "replace-with-real-api-key"
 ```
 
 This step will:

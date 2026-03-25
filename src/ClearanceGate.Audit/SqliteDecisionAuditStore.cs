@@ -23,6 +23,7 @@ public sealed class SqliteDecisionAuditStore(
                 decision_id,
                 profile,
                 owner,
+                request_fingerprint,
                 acknowledger_id,
                 outcome,
                 clearance_state,
@@ -59,6 +60,7 @@ public sealed class SqliteDecisionAuditStore(
                 decision_id,
                 profile,
                 owner,
+                request_fingerprint,
                 acknowledger_id,
                 outcome,
                 clearance_state,
@@ -102,6 +104,7 @@ public sealed class SqliteDecisionAuditStore(
                         decision_id,
                         profile,
                         owner,
+                        request_fingerprint,
                         acknowledger_id,
                         outcome,
                         clearance_state,
@@ -115,6 +118,7 @@ public sealed class SqliteDecisionAuditStore(
                         $decisionId,
                         $profile,
                         $owner,
+                        $requestFingerprint,
                         $acknowledgerId,
                         $outcome,
                         $clearanceState,
@@ -317,6 +321,7 @@ public sealed class SqliteDecisionAuditStore(
         command.Parameters.AddWithValue("$decisionId", record.DecisionId);
         command.Parameters.AddWithValue("$profile", record.Profile);
         command.Parameters.AddWithValue("$owner", record.Owner);
+        command.Parameters.AddWithValue("$requestFingerprint", (object?)record.RequestFingerprint ?? DBNull.Value);
         command.Parameters.AddWithValue("$acknowledgerId", (object?)record.AcknowledgerId ?? DBNull.Value);
         command.Parameters.AddWithValue("$outcome", record.Outcome);
         command.Parameters.AddWithValue("$clearanceState", record.ClearanceState);
@@ -340,6 +345,7 @@ public sealed class SqliteDecisionAuditStore(
                 decision_id,
                 profile,
                 owner,
+                request_fingerprint,
                 acknowledger_id,
                 outcome,
                 clearance_state,
@@ -379,6 +385,7 @@ public sealed class SqliteDecisionAuditStore(
                 decision_id,
                 profile,
                 owner,
+                request_fingerprint,
                 acknowledger_id,
                 outcome,
                 clearance_state,
@@ -411,13 +418,14 @@ public sealed class SqliteDecisionAuditStore(
             DecisionId = reader.GetString(1),
             Profile = reader.GetString(2),
             Owner = reader.GetString(3),
-            AcknowledgerId = reader.IsDBNull(4) ? null : reader.GetString(4),
-            Outcome = reader.GetString(5),
-            ClearanceState = reader.GetString(6),
-            EvidenceId = reader.GetString(7),
-            Summary = reader.GetString(8),
-            KernelVersion = reader.GetString(9),
-            PolicyVersion = reader.GetString(10),
+            RequestFingerprint = reader.IsDBNull(4) ? null : reader.GetString(4),
+            AcknowledgerId = reader.IsDBNull(5) ? null : reader.GetString(5),
+            Outcome = reader.GetString(6),
+            ClearanceState = reader.GetString(7),
+            EvidenceId = reader.GetString(8),
+            Summary = reader.GetString(9),
+            KernelVersion = reader.GetString(10),
+            PolicyVersion = reader.GetString(11),
         };
 
     private static void LoadConstraints(SqliteConnection connection, DecisionAuditRecord record) =>

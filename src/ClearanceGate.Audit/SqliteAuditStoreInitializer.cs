@@ -50,7 +50,7 @@ public sealed class SqliteAuditStoreInitializer(
         }
 
         await ApplyPendingMigrationsAsync(connection, schemaVersion, cancellationToken);
-        await EnsureRequiredTablesExistAsync(connection, cancellationToken);
+        await EnsureRequiredSchemaAsync(connection, cancellationToken);
 
         logger.LogInformation(
             LogEvents.InitializationCompleted,
@@ -142,11 +142,11 @@ public sealed class SqliteAuditStoreInitializer(
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    private static async Task EnsureRequiredTablesExistAsync(
+    private static async Task EnsureRequiredSchemaAsync(
         SqliteConnection connection,
         CancellationToken cancellationToken)
     {
-        foreach (var tableName in RequiredTables)
+        foreach (var validation in RequiredSchema)
         {
             var command = connection.CreateCommand();
             command.CommandText =
@@ -156,23 +156,46 @@ public sealed class SqliteAuditStoreInitializer(
                 WHERE type = 'table'
                   AND name = $name;
                 """;
-            command.Parameters.AddWithValue("$name", tableName);
+            command.Parameters.AddWithValue("$name", validation.TableName);
 
             var exists = await command.ExecuteScalarAsync(cancellationToken) is not null;
             if (!exists)
             {
                 throw new InvalidOperationException(
-                    $"Audit store schema is incomplete. Required table '{tableName}' is missing.");
+                    $"Audit store schema is incomplete. Required table '{validation.TableName}' is missing.");
+            }
+
+            foreach (var columnName in validation.RequiredColumns)
+            {
+                var columnCommand = connection.CreateCommand();
+                columnCommand.CommandText = $"PRAGMA table_info({validation.TableName});";
+
+                await using var reader = await columnCommand.ExecuteReaderAsync(cancellationToken);
+                var found = false;
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    if (string.Equals(reader.GetString(1), columnName, StringComparison.Ordinal))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    throw new InvalidOperationException(
+                        $"Audit store schema is incomplete. Required column '{validation.TableName}.{columnName}' is missing.");
+                }
             }
         }
     }
 
-    private static readonly string[] RequiredTables =
+    private static readonly AuditStoreSchemaValidation[] RequiredSchema =
     [
-        "schema_metadata",
-        "decisions",
-        "decision_constraints",
-        "decision_timeline",
+        new("schema_metadata", []),
+        new("decisions", ["request_fingerprint"]),
+        new("decision_constraints", []),
+        new("decision_timeline", []),
     ];
 
     private static readonly AuditStoreSchemaMigration[] Migrations =
@@ -212,6 +235,28 @@ public sealed class SqliteAuditStoreInitializer(
                         timestamp TEXT NOT NULL,
                         FOREIGN KEY (decision_id) REFERENCES decisions(decision_id) ON DELETE CASCADE
                     );
+                    """;
+                await command.ExecuteNonQueryAsync(cancellationToken);
+            }),
+        new(
+            2,
+            async (connection, cancellationToken) =>
+            {
+                var inspect = connection.CreateCommand();
+                inspect.CommandText = "PRAGMA table_info(decisions);";
+                await using var reader = await inspect.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    if (string.Equals(reader.GetString(1), "request_fingerprint", StringComparison.Ordinal))
+                    {
+                        return;
+                    }
+                }
+
+                var command = connection.CreateCommand();
+                command.CommandText =
+                    """
+                    ALTER TABLE decisions ADD COLUMN request_fingerprint TEXT NULL;
                     """;
                 await command.ExecuteNonQueryAsync(cancellationToken);
             }),

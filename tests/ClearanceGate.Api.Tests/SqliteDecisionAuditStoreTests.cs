@@ -150,6 +150,7 @@ public sealed class SqliteDecisionAuditStoreTests
             DecisionId = decisionId,
             Profile = "itops_deployment_v1",
             Owner = "alice",
+            RequestFingerprint = $"{requestId}:{decisionId}",
             Outcome = outcome,
             ClearanceState = state,
             EvidenceId = $"evidence:{decisionId}",

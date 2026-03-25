@@ -5,7 +5,8 @@ param(
     [string]$AuditStorePath = "",
     [string]$AuthorizeInputPath = "",
     [string]$AcknowledgeInputPath = "",
-    [string]$Profile = "itops_deployment_v1"
+    [string]$Profile = "itops_deployment_v1",
+    [string]$ApiKey = "clearancegate-local-dev-key"
 )
 
 Set-StrictMode -Version Latest
@@ -79,19 +80,21 @@ $job = Start-Job -ScriptBlock {
         [string]$repoRoot,
         [string]$auditStorePath,
         [string]$hostCommand,
-        [string[]]$hostArguments
+        [string[]]$hostArguments,
+        [string]$apiKey
     )
 
     Set-Location $repoRoot
     $env:ConnectionStrings__AuditStore = "Data Source=$auditStorePath"
+    $env:Authentication__ApiKey = $apiKey
     & $hostCommand @hostArguments
-} -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments
+} -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments, $ApiKey
 
 try {
     for ($attempt = 1; $attempt -le 30; $attempt++) {
         Start-Sleep -Seconds 1
         try {
-            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" | Out-Null
+            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers @{ Authorization = "Bearer $ApiKey" } | Out-Null
             break
         }
         catch {
@@ -107,6 +110,7 @@ try {
         -AuthorizeInputPath $resolvedAuthorizeInputPath `
         -AcknowledgeInputPath $resolvedAcknowledgeInputPath `
         -Profile $Profile `
+        -ApiKey $ApiKey `
         -UseExistingHost
 
     if ([string]::IsNullOrWhiteSpace([string]$callerIntegrationRehearsalRoot) -or -not (Test-Path $callerIntegrationRehearsalRoot)) {

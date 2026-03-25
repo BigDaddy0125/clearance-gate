@@ -6,6 +6,7 @@ param(
     [string]$Profile = "itops_deployment_v1",
     [string]$AuthorizeInputPath = "",
     [string]$AcknowledgeInputPath = "",
+    [string]$ApiKey = "clearancegate-local-dev-key",
     [switch]$UseExistingHost
 )
 
@@ -47,6 +48,8 @@ $resolvedAuditStorePath =
     else {
         $AuditStorePath
     }
+
+$authHeaders = @{ Authorization = "Bearer $ApiKey" }
 
 & (Join-Path $repoRoot "scripts\validate-release-bundle.ps1") | Out-Null
 & (Join-Path $repoRoot "scripts\validate-pilot-adapter-example.ps1") -Profile $Profile | Out-Null
@@ -109,20 +112,22 @@ if (-not $UseExistingHost) {
             [string]$repoRoot,
             [string]$auditStorePath,
             [string]$hostCommand,
-            [string[]]$hostArguments
+            [string[]]$hostArguments,
+            [string]$apiKey
         )
 
         Set-Location $repoRoot
         $env:ConnectionStrings__AuditStore = "Data Source=$auditStorePath"
+        $env:Authentication__ApiKey = $apiKey
         & $hostCommand @hostArguments
-    } -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments
+    } -ArgumentList $repoRoot, $resolvedAuditStorePath, $hostCommand, $hostArguments, $ApiKey
 }
 
 try {
     for ($attempt = 1; $attempt -le 30; $attempt++) {
         Start-Sleep -Seconds 1
         try {
-            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" | Out-Null
+            Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers $authHeaders | Out-Null
             break
         }
         catch {
@@ -161,12 +166,13 @@ try {
     $ackMapped.acknowledgment.timestamp = $ackTimestamp
     Write-JsonFile -Path (Join-Path $requestsRoot "mapped-acknowledge-request.json") -Value $ackMapped
 
-    $profilesResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles"
+    $profilesResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers $authHeaders
     Write-JsonFile -Path (Join-Path $responsesRoot "profiles-response.json") -Value $profilesResponse
 
     $authorizeResponse = Invoke-RestMethod `
         -Method Post `
         -Uri "$BaseUrl/authorize" `
+        -Headers $authHeaders `
         -ContentType "application/json" `
         -Body ($authorizeMapped | ConvertTo-Json -Depth 20)
 
@@ -179,6 +185,7 @@ try {
     $ackResponse = Invoke-RestMethod `
         -Method Post `
         -Uri "$BaseUrl/acknowledge" `
+        -Headers $authHeaders `
         -ContentType "application/json" `
         -Body ($ackMapped | ConvertTo-Json -Depth 20)
 
@@ -188,10 +195,10 @@ try {
 
     Write-JsonFile -Path (Join-Path $responsesRoot "acknowledge-response.json") -Value $ackResponse
 
-    $compactAudit = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId"
-    $exportAudit = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId/export"
-    $requestCompact = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId"
-    $requestExport = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId/export"
+    $compactAudit = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId" -Headers $authHeaders
+    $exportAudit = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId/export" -Headers $authHeaders
+    $requestCompact = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId" -Headers $authHeaders
+    $requestExport = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId/export" -Headers $authHeaders
 
     Write-JsonFile -Path (Join-Path $responsesRoot "audit-compact.json") -Value $compactAudit
     Write-JsonFile -Path (Join-Path $responsesRoot "audit-export.json") -Value $exportAudit

@@ -21,9 +21,12 @@ public sealed class AuthorizationService(
         ClearanceGate.Contracts.AuthorizationRequest request,
         CancellationToken cancellationToken)
     {
+        var requestFingerprint = ClearanceGate.Application.RequestFingerprintCalculator.Compute(request);
         var existingRecord = auditStore.GetByRequestId(request.RequestId);
         if (existingRecord is not null)
         {
+            EnsureReplayCompatible(existingRecord, request, requestFingerprint);
+
             logger.LogInformation(
                 LogEvents.ReplayReturned,
                 "Authorization request replayed existing record. RequestId={RequestId} DecisionId={DecisionId} Outcome={Outcome} ClearanceState={ClearanceState}",
@@ -55,6 +58,7 @@ public sealed class AuthorizationService(
             DecisionId = request.DecisionId,
             Profile = request.Profile,
             Owner = request.Responsibility.Owner,
+            RequestFingerprint = requestFingerprint,
             Outcome = outcome.ToWireName(),
             ClearanceState = decision.State.ToWireName(),
             EvidenceId = $"evidence:{request.DecisionId}",
@@ -86,6 +90,27 @@ public sealed class AuthorizationService(
             savedRecord.ConstraintsApplied.Count);
 
         return Task.FromResult(ToResponse(savedRecord));
+    }
+
+    private static void EnsureReplayCompatible(
+        ClearanceGate.Audit.DecisionAuditRecord existingRecord,
+        ClearanceGate.Contracts.AuthorizationRequest request,
+        string requestFingerprint)
+    {
+        if (!string.IsNullOrWhiteSpace(existingRecord.RequestFingerprint) &&
+            !string.Equals(existingRecord.RequestFingerprint, requestFingerprint, StringComparison.Ordinal))
+        {
+            throw new ClearanceGate.Application.RequestIntegrityException(
+                $"RequestId '{request.RequestId}' is already bound to a different authorization request.");
+        }
+
+        if (!string.Equals(existingRecord.DecisionId, request.DecisionId, StringComparison.Ordinal) ||
+            !string.Equals(existingRecord.Profile, request.Profile, StringComparison.Ordinal) ||
+            !string.Equals(existingRecord.Owner, request.Responsibility.Owner, StringComparison.Ordinal))
+        {
+            throw new ClearanceGate.Application.RequestIntegrityException(
+                $"RequestId '{request.RequestId}' is already bound to a different authorization request.");
+        }
     }
 
     private void EnsureRoleAllowed(

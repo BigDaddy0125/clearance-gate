@@ -1,3 +1,4 @@
+using ClearanceGate.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
@@ -21,6 +22,16 @@ if (!string.IsNullOrWhiteSpace(configuredAuditStoreConnectionString))
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddProblemDetails();
+builder.Services.AddAuthentication(ApiAuthenticationOptions.SchemeName)
+    .AddScheme<ApiAuthenticationOptions, ApiKeyAuthenticationHandler>(
+        ApiAuthenticationOptions.SchemeName,
+        options => { });
+builder.Services.AddAuthorization();
+builder.Services.AddOptions<ApiAuthenticationOptions>()
+    .Bind(builder.Configuration.GetSection(ApiAuthenticationOptions.SectionName));
+builder.Services.AddOptions<ApiAuthenticationOptions>(ApiAuthenticationOptions.SchemeName)
+    .Bind(builder.Configuration.GetSection(ApiAuthenticationOptions.SectionName));
+builder.Services.AddSingleton<IValidateOptions<ApiAuthenticationOptions>, ApiAuthenticationOptionsValidator>();
 
 builder.Services.Configure<ClearanceGate.Audit.AuditStoreOptions>(options =>
 {
@@ -44,14 +55,20 @@ await ClearanceGate.Api.StartupValidation.ValidateAsync(
     CancellationToken.None);
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapPost("/authorize", async Task<IResult> (
+var api = app.MapGroup(string.Empty)
+    .RequireAuthorization();
+
+api.MapPost("/authorize", async Task<IResult> (
     ClearanceGate.Contracts.AuthorizationRequest request,
     ClearanceGate.Application.Abstractions.IAuthorizationService service,
     CancellationToken cancellationToken) =>
 {
     try
     {
+        RequestContractValidator.Validate(request);
         var response = await service.AuthorizeAsync(request, cancellationToken);
         return TypedResults.Ok(response);
     }
@@ -73,15 +90,25 @@ app.MapPost("/authorize", async Task<IResult> (
             Status = StatusCodes.Status400BadRequest,
         });
     }
+    catch (ClearanceGate.Application.RequestIntegrityException exception)
+    {
+        return TypedResults.Conflict(new ProblemDetails
+        {
+            Title = "Authorization rejected",
+            Detail = exception.Message,
+            Status = StatusCodes.Status409Conflict,
+        });
+    }
 });
 
-app.MapPost("/acknowledge", async Task<IResult> (
+api.MapPost("/acknowledge", async Task<IResult> (
     ClearanceGate.Contracts.AcknowledgmentRequest request,
     ClearanceGate.Application.Abstractions.IAcknowledgmentService service,
     CancellationToken cancellationToken) =>
 {
     try
     {
+        RequestContractValidator.Validate(request);
         var response = await service.AcknowledgeAsync(request, cancellationToken);
         return TypedResults.Ok(response);
     }
@@ -109,7 +136,7 @@ app.MapPost("/acknowledge", async Task<IResult> (
     }
 });
 
-app.MapGet("/audit/{decisionId}",
+api.MapGet("/audit/{decisionId}",
     async Task<IResult> (
         string decisionId,
         ClearanceGate.Application.Abstractions.IAuditQueryService service,
@@ -119,7 +146,7 @@ app.MapGet("/audit/{decisionId}",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
-app.MapGet("/audit/request/{requestId}",
+api.MapGet("/audit/request/{requestId}",
     async Task<IResult> (
         string requestId,
         ClearanceGate.Application.Abstractions.IAuditQueryService service,
@@ -129,7 +156,7 @@ app.MapGet("/audit/request/{requestId}",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
-app.MapGet("/audit/{decisionId}/export",
+api.MapGet("/audit/{decisionId}/export",
     async Task<IResult> (
         string decisionId,
         ClearanceGate.Application.Abstractions.IAuditQueryService service,
@@ -139,7 +166,7 @@ app.MapGet("/audit/{decisionId}/export",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
-app.MapGet("/audit/request/{requestId}/export",
+api.MapGet("/audit/request/{requestId}/export",
     async Task<IResult> (
         string requestId,
         ClearanceGate.Application.Abstractions.IAuditQueryService service,
@@ -149,7 +176,7 @@ app.MapGet("/audit/request/{requestId}/export",
         return response is null ? TypedResults.NotFound() : TypedResults.Ok(response);
     });
 
-app.MapGet("/profiles",
+api.MapGet("/profiles",
     (ClearanceGate.Profiles.IProfileCatalog catalog) =>
     {
         var response = new ClearanceGate.Contracts.ProfileCatalogResponse(
@@ -165,7 +192,7 @@ app.MapGet("/profiles",
         return TypedResults.Ok(response);
     });
 
-app.MapGet("/profiles/latest/{family}",
+api.MapGet("/profiles/latest/{family}",
     IResult (string family, ClearanceGate.Profiles.IProfileCatalog catalog) =>
     {
         try

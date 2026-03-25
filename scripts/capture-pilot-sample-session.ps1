@@ -3,7 +3,8 @@ param(
     [string]$BaseUrl = "http://localhost:5000",
     [string]$OutputRoot = "",
     [string]$ProfileFamily = "itops_deployment",
-    [string]$ExpectedProfileId = "itops_deployment_v1"
+    [string]$ExpectedProfileId = "itops_deployment_v1",
+    [string]$ApiKey = "clearancegate-local-dev-key"
 )
 
 Set-StrictMode -Version Latest
@@ -35,6 +36,7 @@ $decisionId = "dec-pilot-session-$runSuffix"
 $evidenceId = "evidence:$decisionId"
 $authorizeTimestamp = [DateTime]::UtcNow.ToString("o")
 $acknowledgeTimestamp = [DateTime]::UtcNow.AddMinutes(1).ToString("o")
+$authHeaders = @{ Authorization = "Bearer $ApiKey" }
 
 function Write-JsonFile {
     param(
@@ -46,8 +48,8 @@ function Write-JsonFile {
 }
 
 Write-Host "Checking profile diagnostics..."
-$profilesResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles"
-$latestProfileResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles/latest/$ProfileFamily"
+$profilesResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles" -Headers $authHeaders
+$latestProfileResponse = Invoke-RestMethod -Method Get -Uri "$BaseUrl/profiles/latest/$ProfileFamily" -Headers $authHeaders
 
 if ([string]$latestProfileResponse.profile.profile -ne $ExpectedProfileId) {
     throw "Latest profile mismatch. Expected '$ExpectedProfileId' but got '$($latestProfileResponse.profile.profile)'."
@@ -68,6 +70,7 @@ Write-Host "Submitting authorize request..."
 $authorizeResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/authorize" `
+    -Headers $authHeaders `
     -ContentType "application/json" `
     -Body ($authorizePayload | ConvertTo-Json -Depth 20)
 
@@ -91,6 +94,7 @@ Write-Host "Submitting acknowledgment..."
 $acknowledgeResponse = Invoke-RestMethod `
     -Method Post `
     -Uri "$BaseUrl/acknowledge" `
+    -Headers $authHeaders `
     -ContentType "application/json" `
     -Body ($acknowledgePayload | ConvertTo-Json -Depth 20)
 
@@ -105,10 +109,10 @@ if ([string]$acknowledgeResponse.clearanceState -ne "AUTHORIZED") {
 Write-JsonFile -Path (Join-Path $responsesRoot "acknowledge-response.json") -Value $acknowledgeResponse
 
 Write-Host "Reading audit views..."
-$compactByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId"
-$exportByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId/export"
-$compactByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId"
-$exportByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId/export"
+$compactByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId" -Headers $authHeaders
+$exportByDecision = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/$decisionId/export" -Headers $authHeaders
+$compactByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId" -Headers $authHeaders
+$exportByRequest = Invoke-RestMethod -Method Get -Uri "$BaseUrl/audit/request/$requestId/export" -Headers $authHeaders
 
 if ([string]$compactByDecision.evidenceId -ne $evidenceId) {
     throw "Compact audit evidenceId mismatch. Expected '$evidenceId' but got '$($compactByDecision.evidenceId)'."

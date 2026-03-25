@@ -24,6 +24,12 @@ Default local base URL:
 http://localhost:5000
 ```
 
+Default local auth header in the maintained scripts:
+
+```text
+Authorization: Bearer clearancegate-local-dev-key
+```
+
 ## Files
 
 Reusable request bodies are provided in:
@@ -40,6 +46,7 @@ Authorize:
 Invoke-RestMethod `
   -Method Post `
   -Uri http://localhost:5000/authorize `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" } `
   -ContentType "application/json" `
   -InFile .\examples\v0\authorize-risk.json
 ```
@@ -71,6 +78,7 @@ Acknowledge:
 Invoke-RestMethod `
   -Method Post `
   -Uri http://localhost:5000/acknowledge `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" } `
   -ContentType "application/json" `
   -InFile .\examples\v0\acknowledge-risk.json
 ```
@@ -91,7 +99,8 @@ Read compact audit:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/audit/dec-example-risk-1
+  -Uri http://localhost:5000/audit/dec-example-risk-1 `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 Expected compact audit shape:
@@ -124,7 +133,8 @@ Read fuller export:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/audit/dec-example-risk-1/export
+  -Uri http://localhost:5000/audit/dec-example-risk-1/export `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 The export view includes:
@@ -142,6 +152,7 @@ Authorize:
 Invoke-RestMethod `
   -Method Post `
   -Uri http://localhost:5000/authorize `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" } `
   -ContentType "application/json" `
   -InFile .\examples\v0\authorize-blocked.json
 ```
@@ -174,6 +185,7 @@ Acknowledgment must not release this decision:
 Invoke-RestMethod `
   -Method Post `
   -Uri http://localhost:5000/acknowledge `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" } `
   -ContentType "application/json" `
   -InFile .\examples\v0\acknowledge-risk.json
 ```
@@ -190,7 +202,8 @@ Compact view by request id:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/audit/request/req-example-risk-1
+  -Uri http://localhost:5000/audit/request/req-example-risk-1 `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 Export view by request id:
@@ -198,7 +211,8 @@ Export view by request id:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/audit/request/req-example-risk-1/export
+  -Uri http://localhost:5000/audit/request/req-example-risk-1/export `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 These endpoints exist so external systems can reconcile using the idempotent request identifier rather than a decision id discovered later.
@@ -210,7 +224,8 @@ List embedded profiles:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/profiles
+  -Uri http://localhost:5000/profiles `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 Expected response shape:
@@ -241,7 +256,8 @@ Resolve latest version for a family:
 ```powershell
 Invoke-RestMethod `
   -Method Get `
-  -Uri http://localhost:5000/profiles/latest/itops_deployment
+  -Uri http://localhost:5000/profiles/latest/itops_deployment `
+  -Headers @{ Authorization = "Bearer clearancegate-local-dev-key" }
 ```
 
 Important:

@@ -7,10 +7,11 @@ public static class StartupValidation
     private static class LogEvents
     {
         public static readonly EventId ValidationStarted = new(1000, nameof(ValidationStarted));
-        public static readonly EventId AuditStoreOptionsResolved = new(1001, nameof(AuditStoreOptionsResolved));
-        public static readonly EventId ProfileCatalogLoaded = new(1002, nameof(ProfileCatalogLoaded));
-        public static readonly EventId ValidationCompleted = new(1003, nameof(ValidationCompleted));
-        public static readonly EventId ValidationFailed = new(1004, nameof(ValidationFailed));
+        public static readonly EventId AuthenticationOptionsResolved = new(1001, nameof(AuthenticationOptionsResolved));
+        public static readonly EventId AuditStoreOptionsResolved = new(1002, nameof(AuditStoreOptionsResolved));
+        public static readonly EventId ProfileCatalogLoaded = new(1003, nameof(ProfileCatalogLoaded));
+        public static readonly EventId ValidationCompleted = new(1004, nameof(ValidationCompleted));
+        public static readonly EventId ValidationFailed = new(1005, nameof(ValidationFailed));
     }
 
     public static async Task ValidateAsync(
@@ -21,6 +22,12 @@ public static class StartupValidation
         try
         {
             logger.LogInformation(LogEvents.ValidationStarted, "Starting fail-closed startup validation.");
+
+            var authenticationOptions = services.GetRequiredService<IOptions<ApiAuthenticationOptions>>().Value;
+            logger.LogInformation(
+                LogEvents.AuthenticationOptionsResolved,
+                "Authentication configuration resolved for startup validation. ApiKeyPresent={ApiKeyPresent}",
+                !string.IsNullOrWhiteSpace(authenticationOptions.ApiKey));
 
             var auditStoreOptions = services.GetRequiredService<IOptions<ClearanceGate.Audit.AuditStoreOptions>>().Value;
             logger.LogInformation(
